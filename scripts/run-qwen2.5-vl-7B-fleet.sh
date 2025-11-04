@@ -54,7 +54,7 @@ FLEET_ARGS=(
 
 PERF_ARGS=(
   --use-dynamic-batch-size
-  --max-tokens-per-gpu 4096
+  --max-tokens-per-gpu 2048
   --tensor-model-parallel-size 2
   --pipeline-model-parallel-size 1
   --context-parallel-size 1
@@ -62,6 +62,10 @@ PERF_ARGS=(
   --expert-tensor-parallel-size 1
   --actor-num-nodes 1 \
   --actor-num-gpus-per-node 4 \
+
+  --recompute-granularity full
+  --recompute-method uniform
+  --recompute-num-layers 4
 )
 
 SGLANG_ARGS=(

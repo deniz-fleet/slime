@@ -114,8 +114,8 @@ def main():
     print(f"{type(model)=}")
 
     # Force synchronous filesystem writer for torch_dist to avoid async zip race
-    checkpointing_context = {"save_strategy": SyncTorchDistSaveShardedStrategy("torch_dist", 1)}
-    save_checkpoint(1, model, None, None, 0, checkpointing_context=checkpointing_context)
+    #checkpointing_context = {"save_strategy": SyncTorchDistSaveShardedStrategy("torch_dist", 1)}
+    save_checkpoint(1, model, None, None, 0)
 
     if dist.get_rank() == 0:
         # change to release ckpt

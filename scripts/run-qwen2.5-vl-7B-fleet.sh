@@ -69,7 +69,7 @@ PERF_ARGS=(
 )
 
 SGLANG_ARGS=(
-   --rollout-num-gpus 4
+   --rollout-num-gpus 8
    --rollout-num-gpus-per-engine 2
    --sglang-mem-fraction-static 0.65
 )
@@ -77,6 +77,14 @@ SGLANG_ARGS=(
 OPTIMIZER_ARGS=(
   --optimizer adam
   --lr 1e-6
+)
+
+
+WANDB_ARGS=(
+   --use-wandb
+   --wandb-project slime-dev-qwen3
+   --wandb-group qwen3-4B-4xgpu
+   --wandb-key ${WANDB_KEY}
 )
 
 # 3) Launch ray head (single-node default)
@@ -93,7 +101,8 @@ RUNTIME_ENV_JSON='{
 
 ray job submit --address="http://127.0.0.1:8265" \
   --runtime-env-json="${RUNTIME_ENV_JSON}" \
-  -- python3 train_async.py \
+  -- python3 train_py \
+  --colocate \
   ${SGLANG_ARGS[@]} \
   ${MODEL_ARGS[@]} \
   ${CKPT_ARGS[@]} \

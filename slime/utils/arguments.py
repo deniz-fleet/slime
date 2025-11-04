@@ -309,6 +309,20 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
                 ),
             )
 
+            # Fleet-specific tool loop controls
+            parser.add_argument(
+                "--fleet-env",
+                type=str,
+                default=None,
+                help="Fleet environment key, e.g. 'amazon' or 'amazon:vX', used by custom Fleet generate/RM.",
+            )
+            parser.add_argument(
+                "--max-tool-turns",
+                type=int,
+                default=4,
+                help="Maximum tool-calling turns in custom Fleet generate loop.",
+            )
+
             parser.add_argument(
                 "--buffer-filter-path",
                 type=str,

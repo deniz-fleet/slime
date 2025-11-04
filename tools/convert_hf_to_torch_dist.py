@@ -98,9 +98,7 @@ def main():
         bridge.load_weights(model, hf_model_path, memory_efficient=True)
     print(f"Model loaded: {hf_model_path=}, {model=}")
 
-    # Force synchronous filesystem writer for torch_dist to avoid async zip race
-    checkpointing_context = {"save_strategy": TorchSave(storage_writer=FilesystemWriter())}
-    save_checkpoint(1, model, None, None, 0, checkpointing_context=checkpointing_context)
+    save_checkpoint(1, model, None, None, 0)
 
     if dist.get_rank() == 0:
         # change to release ckpt

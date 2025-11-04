@@ -93,6 +93,7 @@ def main():
     bridge_class_name = bridge.__class__.__name__
     if bridge_class_name in ("Qwen2_5VLBridge", "Qwen3VLBridge"):
         model = bridge.get_model(weight_path=hf_model_path)
+        bridge.load_weights(model, hf_model_path, memory_efficient=True)
     else:
         model = get_model(get_model_provider_func(args), ModelType.encoder_or_decoder, wrap_with_ddp=False)
         bridge.load_weights(model, hf_model_path, memory_efficient=True)

@@ -110,6 +110,7 @@ def main():
         model = get_model(get_model_provider_func(args), ModelType.encoder_or_decoder, wrap_with_ddp=False)
     bridge.load_weights(model, hf_model_path, memory_efficient=True)
     print(f"Model loaded: {hf_model_path=}, {model=}")
+    print(f"{type(model)=}")
 
     # Force synchronous filesystem writer for torch_dist to avoid async zip race
     checkpointing_context = {"save_strategy": SyncTorchDistSaveShardedStrategy("torch_dist", 1)}

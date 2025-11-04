@@ -6,7 +6,7 @@ __all__ = ["validate_args", "parse_args", "set_default_megatron_args"]
 
 def set_default_megatron_args(args):
     # always use zero optimizer
-    args.use_distributed_optimizer = True
+    args.use_distributed_optimizer = False
     # TODO: maybe change this after megatron has good fp8 support
     args.bf16 = True
     # placeholders

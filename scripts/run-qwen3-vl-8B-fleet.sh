@@ -50,9 +50,21 @@ FLEET_ARGS=(
 )
 
 PERF_ARGS=(
-  # Adjust parallelism as needed; leave simple by default
   --use-dynamic-batch-size
   --max-tokens-per-gpu 4096
+  --tensor-model-parallel-size 2
+  --pipeline-model-parallel-size 1
+  --context-parallel-size 1
+  --expert-model-parallel-size 1
+  --expert-tensor-parallel-size 1
+  --actor-num-nodes 1 \
+  --actor-num-gpus-per-node 4 \
+)
+
+SGLANG_ARGS=(
+   --rollout-num-gpus 4
+   --rollout-num-gpus-per-engine 1
+   --sglang-mem-fraction-static 0.65
 )
 
 OPTIMIZER_ARGS=(
@@ -75,9 +87,7 @@ RUNTIME_ENV_JSON='{
 ray job submit --address="http://127.0.0.1:8265" \
   --runtime-env-json="${RUNTIME_ENV_JSON}" \
   -- python3 train_async.py \
-  --actor-num-nodes 1 \
-  --actor-num-gpus-per-node 4 \
-  --rollout-num-gpus 4 \
+  ${SGLANG_ARGS[@]} \
   ${MODEL_ARGS[@]} \
   ${CKPT_ARGS[@]} \
   ${ROLLOUT_ARGS[@]} \

@@ -6,6 +6,9 @@ set -ex
 export PYTHONBUFFERED=16
 export FLEET_API_KEY=${FLEET_API_KEY:-""}
 
+pip install -U transformers
+pip install -U fleet-python
+
 # 1) Download model and export Fleet tasks
 hf download Qwen/Qwen3-VL-8B-Thinking --local-dir /root/Qwen3-VL-8B-Thinking
 

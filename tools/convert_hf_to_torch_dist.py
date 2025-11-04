@@ -64,12 +64,14 @@ def get_args():
     )
 
     validate_args(args)
+    print(f"{args=}")
 
-    # Conversion tool: enforce synchronous, legacy-style checkpoint save to avoid async zip writer issues
-    for flag in ("async_save", "use_async_checkpoint_io", "use_async_io"):
-        if hasattr(args, flag):
-            setattr(args, flag, False)
+    # Conversion tool: enforce synchronous distributed checkpoint save (no async writers)
+    # Keep dist checkpointing enabled for proper sharded tensor serialization
     for flag in ("use_dist_ckpt", "use_dist_checkpointing"):
+        if hasattr(args, flag):
+            setattr(args, flag, True)
+    for flag in ("async_save", "use_async_checkpoint_io", "use_async_io", "dist_ckpt_save_async"):
         if hasattr(args, flag):
             setattr(args, flag, False)
     return args

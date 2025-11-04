@@ -7,6 +7,8 @@ from megatron.core.enums import ModelType
 from megatron.training.arguments import parse_args, validate_args
 from megatron.training.checkpointing import get_checkpoint_name, get_checkpoint_tracker_filename, save_checkpoint
 from megatron.training.training import get_model
+from megatron.core.dist_checkpointing.strategies.torch import TorchSave
+from megatron.core.dist_checkpointing.strategies.filesystem import FilesystemWriter
 
 import slime_plugins.mbridge  # noqa: F401
 from mbridge import AutoBridge
@@ -64,16 +66,6 @@ def get_args():
     )
 
     validate_args(args)
-    print(f"{args=}")
-
-    # Conversion tool: enforce synchronous distributed checkpoint save (no async writers)
-    # Keep dist checkpointing enabled for proper sharded tensor serialization
-    for flag in ("use_dist_ckpt", "use_dist_checkpointing"):
-        if hasattr(args, flag):
-            setattr(args, flag, True)
-    for flag in ("async_save", "use_async_checkpoint_io", "use_async_io", "dist_ckpt_save_async"):
-        if hasattr(args, flag):
-            setattr(args, flag, False)
     return args
 
 
@@ -107,16 +99,7 @@ def main():
         bridge.load_weights(model, hf_model_path, memory_efficient=True)
     print(f"Model loaded: {hf_model_path=}, {model=}")
 
-    save_checkpoint(
-        iteration=1,
-        model=model,
-        optimizer=None,
-        opt_param_scheduler=None,
-        num_floating_point_operations_so_far=0,
-        checkpointing_context=None,
-        train_data_iterator=None,
-        preprocess_common_state_dict_fn=None,
-    )
+    save_checkpoint(1, model, None, None, 0)
 
     if dist.get_rank() == 0:
         # change to release ckpt

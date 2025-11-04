@@ -6,7 +6,6 @@ set -ex
 export PYTHONBUFFERED=16
 export FLEET_API_KEY=${FLEET_API_KEY:-""}
 
-
 # 1) Download model and export Fleet tasks
 hf download Qwen/Qwen2.5-VL-7B-Instruct --local-dir /root/Qwen2.5-VL-7B-Instruct
 
@@ -25,6 +24,6 @@ PYTHONPATH=/root/Megatron-LM python tools/convert_hf_to_torch_dist.py \
   --save /root/Qwen2.5-VL-7B_torch_dist
 
 # 3) Run RL with separate train/rollout GPUs
-bash scripts/run-qwen3-vl-8B-fleet.sh
+bash scripts/run-qwen2.5-vl-7B-fleet.sh
 
 

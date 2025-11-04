@@ -5,6 +5,7 @@ Quickstart (Fleet MCP + Qwen3‑VL RL)
 cd slime
 pip install -e .
 pip install fleet-python
+pip install -U transformers
 export FLEET_API_KEY="sk_your_key_here"
 ```
 
@@ -15,18 +16,18 @@ bash examples/fleet-env/run_fleet_qwen3_vl_8b_rl.sh
 ```
 
 What it does
-- Download HF model `Qwen/Qwen3-VL-8B-Thinking` locally (for consistent runs).
+- Download HF model `Qwen/Qwen2.5-VL-7B-Instruct` locally (for consistent runs).
 - Export Fleet tasks to JSONL via API:
   ```bash
   python examples/fleet-env/export_fleet_tasks.py --fleet-env amazon --out /root/fleet_tasks.jsonl
   ```
 - Convert HF → TorchDist for RL:
   ```bash
-  source scripts/models/qwen3-vl-8B.sh
+  source scripts/models/qwen2.5-7B.sh
   PYTHONPATH=/root/Megatron-LM python tools/convert_hf_to_torch_dist.py \
     ${MODEL_ARGS[@]} \
-    --hf-checkpoint /root/Qwen3-VL-8B-Thinking \
-    --save /root/Qwen3-VL-8B_torch_dist
+    --hf-checkpoint /root/Qwen2.5-VL-7B-Instruct \
+    --save /root/Qwen2.5-VL-7B_torch_dist
   ```
 - Launch training with separate GPUs for train vs rollout:
   ```bash
@@ -38,6 +39,6 @@ Custom hooks used
 - Reward (verify_detailed_async): `examples/fleet-env/fleet_rm.py:custom_rm`
 
 Model reference
-- Qwen/Qwen3‑VL‑8B‑Thinking: https://huggingface.co/Qwen/Qwen3-VL-8B-Thinking
+- Qwen/Qwen2.5‑VL‑7B‑Instruct: https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct
 
 

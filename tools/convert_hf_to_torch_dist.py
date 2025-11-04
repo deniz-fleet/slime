@@ -11,11 +11,22 @@ from megatron.core.dist_checkpointing.strategies.torch import TorchDistSaveShard
 from megatron.core.dist_checkpointing.strategies.filesystem_async import FileSystemWriterAsync
 
 import slime_plugins.mbridge  # noqa: F401
-from mbridge import AutoBridge
+#from mbridge import AutoBridge
+from megatron.bridge import AutoBridge
 from slime.backends.megatron_utils import set_default_megatron_args
 from slime.backends.megatron_utils.initialize import init
 from slime.backends.megatron_utils.model_provider import get_model_provider_func
 
+
+class SyncTorchDistSaveShardedStrategy(TorchDistSaveShardedStrategy):
+    """A synchronous version of TorchDistSaveShardedStrategy.
+
+    This strategy disables the thread pool in the FileSystemWriterAsync to prevent
+    race conditions that can occur when saving large or complex model checkpoints.
+    """
+
+    def _get_default_storage_writer(self):
+        return FileSystemWriterAsync(use_pool=False)
 
 
 def add_convertion_args(parser):
@@ -102,6 +113,8 @@ def main():
     print(f"Model loaded: {hf_model_path=}, {model=}")
     print(f"{type(model)=}")
 
+    # Force synchronous filesystem writer for torch_dist to avoid async zip race
+    #checkpointing_context = {"save_strategy": SyncTorchDistSaveShardedStrategy("torch_dist", 1)}
     save_checkpoint(1, model, None, None, 0)
 
     if dist.get_rank() == 0:

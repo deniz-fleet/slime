@@ -21,7 +21,8 @@ source "${SLIME_ROOT}/scripts/models/qwen2.5-7B.sh"
 PYTHONPATH=/root/Megatron-LM python tools/convert_hf_to_torch_dist.py \
   ${MODEL_ARGS[@]} \
   --hf-checkpoint /root/Qwen2.5-VL-7B-Instruct \
-  --save /root/Qwen2.5-VL-7B_torch_dist
+  --save /root/Qwen2.5-VL-7B_torch_dist \
+  --ckpt-format torch_dcp
 
 # 3) Run RL with separate train/rollout GPUs
 bash scripts/run-qwen2.5-vl-7B-fleet.sh

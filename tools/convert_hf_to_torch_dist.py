@@ -64,6 +64,14 @@ def get_args():
     )
 
     validate_args(args)
+
+    # Conversion tool: enforce synchronous, legacy-style checkpoint save to avoid async zip writer issues
+    for flag in ("async_save", "use_async_checkpoint_io", "use_async_io"):
+        if hasattr(args, flag):
+            setattr(args, flag, False)
+    for flag in ("use_dist_ckpt", "use_dist_checkpointing"):
+        if hasattr(args, flag):
+            setattr(args, flag, False)
     return args
 
 
@@ -95,9 +103,18 @@ def main():
     else:
         model = get_model(get_model_provider_func(args), ModelType.encoder_or_decoder, wrap_with_ddp=False)
         bridge.load_weights(model, hf_model_path, memory_efficient=True)
-    print(f"Model loaded: {hf_model_path}")
+    print(f"Model loaded: {hf_model_path=}, {model=}")
 
-    save_checkpoint(1, model, None, None, 0)
+    save_checkpoint(
+        iteration=1,
+        model=model,
+        optimizer=None,
+        opt_param_scheduler=None,
+        num_floating_point_operations_so_far=0,
+        checkpointing_context=None,
+        train_data_iterator=None,
+        preprocess_common_state_dict_fn=None,
+    )
 
     if dist.get_rank() == 0:
         # change to release ckpt

@@ -7,8 +7,6 @@ from megatron.core.enums import ModelType
 from megatron.training.arguments import parse_args, validate_args
 from megatron.training.checkpointing import get_checkpoint_name, get_checkpoint_tracker_filename, save_checkpoint
 from megatron.training.training import get_model
-from megatron.core.dist_checkpointing.strategies.torch import TorchSave
-from megatron.core.dist_checkpointing.strategies.filesystem import FilesystemWriter
 
 import slime_plugins.mbridge  # noqa: F401
 from mbridge import AutoBridge

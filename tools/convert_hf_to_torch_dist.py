@@ -86,6 +86,8 @@ def main():
     # Load model
     hf_model_path = args.hf_checkpoint
     bridge = AutoBridge.from_pretrained(hf_model_path, trust_remote_code=True)
+    print(f"{bridge=}")
+    print(f"{AutoBridge.list_supported_models()=}")
     bridge.load_weights(model, hf_model_path, memory_efficient=True)
     print(f"Model loaded: {hf_model_path}")
 

@@ -23,7 +23,8 @@ PYTHONPATH=/root/Megatron-LM python tools/convert_hf_to_torch_dist.py \
   --hf-checkpoint /root/Qwen2.5-VL-7B-Instruct \
   --save /root/Qwen2.5-VL-7B_torch_dist \
   --ckpt-format torch_dcp \
-  --use-torch-fsdp2
+  --use-torch-fsdp2 \
+  --no-use-distributed-optimizer
 
 # 3) Run RL with separate train/rollout GPUs
 bash scripts/run-qwen2.5-vl-7B-fleet.sh

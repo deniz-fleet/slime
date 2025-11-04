@@ -1,4 +1,3 @@
-import asyncio
 import json
 from argparse import ArgumentParser
 from typing import Any, Dict
@@ -6,8 +5,8 @@ from typing import Any, Dict
 import fleet
 
 
-async def export_tasks(env_key: str, out_path: str, version: str | None = None,
-                       data_id: str | None = None, data_version: str | None = None) -> None:
+def export_tasks(env_key: str, out_path: str, version: str | None = None,
+                 data_id: str | None = None, data_version: str | None = None) -> None:
     """Export Fleet tasks to a JSONL file for training.
 
     Each line contains a record with fields expected by the RL/SFT pipeline.
@@ -19,7 +18,7 @@ async def export_tasks(env_key: str, out_path: str, version: str | None = None,
       - rm_type: fixed to "fleet" so the custom RM is selected
       - metadata: passthrough of task.metadata (story, etc.)
     """
-    tasks = await fleet.load_tasks(
+    tasks = fleet.load_tasks(
         env_key=env_key, version=version, data_id=data_id, data_version=data_version
     )
 
@@ -53,14 +52,12 @@ def main() -> None:
     parser.add_argument("--data-version", default=None)
     args = parser.parse_args()
 
-    asyncio.run(
-        export_tasks(
-            env_key=args.fleet_env,
-            out_path=args.out,
-            version=args.version,
-            data_id=args.data_id,
-            data_version=args.data_version,
-        )
+    export_tasks(
+        env_key=args.fleet_env,
+        out_path=args.out,
+        version=args.version,
+        data_id=args.data_id,
+        data_version=args.data_version,
     )
 
 

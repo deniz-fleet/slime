@@ -2,7 +2,8 @@ Quickstart (Fleet MCP + Qwen3‑VL RL)
 
 1) Setup
 ```
-conda activate fleet-slime
+cd slime
+pip install -e .
 pip install fleet-python
 export FLEET_API_KEY="sk_your_key_here"
 ```

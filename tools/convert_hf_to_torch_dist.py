@@ -81,14 +81,20 @@ def main():
     torch.cuda.set_device(dist.get_rank() % torch.cuda.device_count())
     args = get_args()
     init(args)
-    model = get_model(get_model_provider_func(args), ModelType.encoder_or_decoder, wrap_with_ddp=False)
 
     # Load model
     hf_model_path = args.hf_checkpoint
     bridge = AutoBridge.from_pretrained(hf_model_path, trust_remote_code=True)
     print(f"{bridge=}")
     print(f"{AutoBridge.list_supported_models()=}")
-    bridge.load_weights(model, hf_model_path, memory_efficient=True)
+
+    # For Qwen2.5-VL and Qwen3-VL, let mbridge construct the model so naming matches mapping
+    bridge_class_name = bridge.__class__.__name__
+    if bridge_class_name in ("Qwen2_5VLBridge", "Qwen3VLBridge"):
+        model = bridge.get_model(weight_path=hf_model_path, memory_efficient=True)
+    else:
+        model = get_model(get_model_provider_func(args), ModelType.encoder_or_decoder, wrap_with_ddp=False)
+        bridge.load_weights(model, hf_model_path, memory_efficient=True)
     print(f"Model loaded: {hf_model_path}")
 
     save_checkpoint(1, model, None, None, 0)

@@ -38,9 +38,9 @@ ROLLOUT_ARGS=(
   --prompt-data /root/fleet_tasks.jsonl
   --input-key prompt
   --metadata-key metadata
-  --rollout-batch-size 4
+  --rollout-batch-size 2
   --n-samples-per-prompt 2
-  --global-batch-size 8
+  --global-batch-size 4
   --num-rollout 50
   --rollout-max-response-len 1024
 )
@@ -66,7 +66,7 @@ PERF_ARGS=(
 
 SGLANG_ARGS=(
    --rollout-num-gpus 4
-   --rollout-num-gpus-per-engine 1
+   --rollout-num-gpus-per-engine 2
    --sglang-mem-fraction-static 0.65
 )
 

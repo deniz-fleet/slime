@@ -7,6 +7,8 @@ from megatron.core.enums import ModelType
 from megatron.training.arguments import parse_args, validate_args
 from megatron.training.checkpointing import get_checkpoint_name, get_checkpoint_tracker_filename, save_checkpoint
 from megatron.training.training import get_model
+from megatron.core.dist_checkpointing.strategies.torch import TorchDistSaveShardedStrategy
+from megatron.core.dist_checkpointing.strategies.filesystem import FilesystemWriter
 
 import slime_plugins.mbridge  # noqa: F401
 from mbridge import AutoBridge
@@ -98,7 +100,11 @@ def main():
     bridge.load_weights(model, hf_model_path, memory_efficient=True)
     print(f"Model loaded: {hf_model_path=}, {model=}")
 
-    save_checkpoint(1, model, None, None, 0)
+    # Force synchronous filesystem writer for torch_dist to avoid async zip race
+    save_strategy = TorchDistSaveShardedStrategy('torch_dist', 1)
+    save_strategy.storage_writer = FilesystemWriter()
+    checkpointing_context = {"save_strategy": save_strategy}
+    save_checkpoint(1, model, None, None, 0, checkpointing_context=checkpointing_context)
 
     if dist.get_rank() == 0:
         # change to release ckpt

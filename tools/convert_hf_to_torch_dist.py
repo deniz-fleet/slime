@@ -7,8 +7,6 @@ from megatron.core.enums import ModelType
 from megatron.training.arguments import parse_args, validate_args
 from megatron.training.checkpointing import get_checkpoint_name, get_checkpoint_tracker_filename, save_checkpoint
 from megatron.training.training import get_model
-from megatron.core.dist_checkpointing.strategies.torch import TorchSave
-from megatron.core.dist_checkpointing.strategies.filesystem import FilesystemWriter
 
 import slime_plugins.mbridge  # noqa: F401
 from mbridge import AutoBridge
@@ -95,7 +93,7 @@ def main():
     bridge_class_name = bridge.__class__.__name__
     if bridge_class_name in ("Qwen2_5VLBridge", "Qwen3VLBridge"):
         model = bridge.get_model(weight_path=hf_model_path)
-        # Use torch_dcp for VL to avoid legacy pickling and async zip races
+        # Ensure distributed checkpoint path that avoids legacy pickling and async zip races
         if hasattr(args, "use_dist_ckpt"):
             args.use_dist_ckpt = True
         if hasattr(args, "ckpt_format"):
@@ -105,9 +103,7 @@ def main():
         bridge.load_weights(model, hf_model_path, memory_efficient=True)
     print(f"Model loaded: {hf_model_path=}, {model=}")
 
-    # Force synchronous filesystem writer for torch_dist to avoid async zip race
-    checkpointing_context = {"save_strategy": TorchSave(storage_writer=FilesystemWriter())}
-    save_checkpoint(1, model, None, None, 0, checkpointing_context=checkpointing_context)
+    save_checkpoint(1, model, None, None, 0)
 
     if dist.get_rank() == 0:
         # change to release ckpt

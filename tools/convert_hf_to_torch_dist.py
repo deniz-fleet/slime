@@ -102,7 +102,7 @@ def main():
 
     # Force synchronous filesystem writer for torch_dist to avoid async zip race
     save_strategy = TorchDistSaveShardedStrategy('torch_dist', 1)
-    save_strategy.storage_writer = FilesystemWriter()
+    save_strategy.storage_writer = FileSystemWriter()
     checkpointing_context = {"save_strategy": save_strategy}
     save_checkpoint(1, model, None, None, 0, checkpointing_context=checkpointing_context)
 

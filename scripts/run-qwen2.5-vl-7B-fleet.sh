@@ -39,7 +39,8 @@ ROLLOUT_ARGS=(
   --input-key prompt
   --metadata-key metadata
   --rollout-batch-size 4
-  --n-samples-per-prompt 1
+  --n-samples-per-prompt 2
+  --global_batch_size 8
   --num-rollout 50
   --rollout-max-response-len 1024
 )

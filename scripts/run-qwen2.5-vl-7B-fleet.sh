@@ -27,6 +27,7 @@ source "${SCRIPT_DIR}/models/qwen2.5-7B.sh"
 CKPT_ARGS=(
   --hf-checkpoint /root/Qwen2.5-VL-7B-Instruct
   --use-torch-fsdp2
+  --no-gradient-accumulation-fusion
   --ref-load /root/Qwen2.5-VL-7B_torch_dist
   --load /root/Qwen2.5-VL-7B_slime
   --save /root/Qwen2.5-VL-7B_slime

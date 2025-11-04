@@ -20,15 +20,15 @@ else
 fi
 echo "HAS_NVLINK: $HAS_NVLINK (detected $NVLINK_COUNT NVLink references)"
 
-# Resolve script dir and source model args (Qwen2.5-VL-7B)
+# Resolve script dir and source model args (Qwen3-VL-8B)
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-source "${SCRIPT_DIR}/models/qwen2.5-7B.sh"
+source "${SCRIPT_DIR}/models/qwen3-vl-8B.sh"
 
 CKPT_ARGS=(
-  --hf-checkpoint /root/Qwen2.5-VL-7B-Instruct
-  --ref-load /root/Qwen2.5-VL-7B_torch_dist
-  --load /root/Qwen2.5-VL-7B_slime
-  --save /root/Qwen2.5-VL-7B_slime
+  --hf-checkpoint /root/Qwen3-VL-8B-Thinking
+  --ref-load /root/Qwen3-VL-8B_torch_dist
+  --load /root/Qwen3-VL-8B_slime
+  --save /root/Qwen3-VL-8B_slime
   --save-interval 20
 )
 

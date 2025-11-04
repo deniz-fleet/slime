@@ -11,8 +11,7 @@ from megatron.core.dist_checkpointing.strategies.torch import TorchDistSaveShard
 from megatron.core.dist_checkpointing.strategies.filesystem_async import FileSystemWriterAsync
 
 import slime_plugins.mbridge  # noqa: F401
-#from mbridge import AutoBridge
-from megatron.bridge import AutoBridge
+from mbridge import AutoBridge
 from slime.backends.megatron_utils import set_default_megatron_args
 from slime.backends.megatron_utils.initialize import init
 from slime.backends.megatron_utils.model_provider import get_model_provider_func

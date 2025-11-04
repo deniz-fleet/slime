@@ -36,6 +36,7 @@ def get_args():
     args.micro_batch_size = 1
     world_size = int(os.environ.get("WORLD_SIZE", "1"))
     args.global_batch_size = int(os.environ.get("WORLD_SIZE", "1"))
+    
 
     assert world_size <= args.num_layers, (
         f"World size {world_size} must be less than or equal to number of layers {args.num_layers}. "
@@ -94,6 +95,11 @@ def main():
     bridge_class_name = bridge.__class__.__name__
     if bridge_class_name in ("Qwen2_5VLBridge", "Qwen3VLBridge"):
         model = bridge.get_model(weight_path=hf_model_path)
+        # Use torch_dcp for VL to avoid legacy pickling and async zip races
+        if hasattr(args, "use_dist_ckpt"):
+            args.use_dist_ckpt = True
+        if hasattr(args, "ckpt_format"):
+            args.ckpt_format = "torch_dcp"
     else:
         model = get_model(get_model_provider_func(args), ModelType.encoder_or_decoder, wrap_with_ddp=False)
         bridge.load_weights(model, hf_model_path, memory_efficient=True)

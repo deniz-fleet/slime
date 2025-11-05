@@ -44,6 +44,10 @@ ROLLOUT_ARGS=(
   --num-rollout 50
   --rollout-max-response-len 1024
 )
+DEBUG_ARGS=(
+   --sglang-enable-metrics
+   --save-debug-rollout-data /workspace/rollouts/{wandb_run_id}/
+)
 
 FLEET_ARGS=(
   --custom-generate-function-path examples.fleet-env.generate_with_fleet.generate
@@ -106,6 +110,7 @@ ray job submit --address="http://127.0.0.1:8265" \
   --actor-num-gpus-per-node 8 \
   --colocate \
   --use-slime-router \
+  ${DEBUG_ARGS[@]} \
   ${SGLANG_ARGS[@]} \
   ${MODEL_ARGS[@]} \
   ${CKPT_ARGS[@]} \

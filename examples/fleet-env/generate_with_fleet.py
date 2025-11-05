@@ -75,7 +75,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
 
                 for turn in range(max_turns):
                     req = {
-                        "model": "default",
+                        "model":"/root/Qwen2.5-VL-7B-Instruct",
                         "messages": messages,
                         "tools": tools,
                         "tool_choice": "required",

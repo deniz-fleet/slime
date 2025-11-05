@@ -55,7 +55,7 @@ FLEET_ARGS=(
 PERF_ARGS=(
   --use-dynamic-batch-size
   --max-tokens-per-gpu 2048
-  --tensor-model-parallel-size 2
+  --tensor-model-parallel-size 1
   --pipeline-model-parallel-size 1
   --context-parallel-size 1
   --expert-model-parallel-size 1

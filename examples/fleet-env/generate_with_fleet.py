@@ -40,6 +40,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                 await session.initialize()
                 tools = await list_mcp_tools(session)
                 tools_param = build_tools_param(tools)
+                print(f"{tools_param=}")
 
                 messages: List[Dict[str, Any]] = [user_message]
 
@@ -53,6 +54,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "tools": tools_param,
                         "tool_choice": "required",
                     }
+                    print(f"{req=}")
                     resp = await post(chat_url, req)
                     choice = (resp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}

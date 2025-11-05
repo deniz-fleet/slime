@@ -105,6 +105,7 @@ ray job submit --address="http://127.0.0.1:8265" \
   --actor-num-nodes 1 \
   --actor-num-gpus-per-node 1 \
   --colocate \
+  --use-slime-router \
   ${SGLANG_ARGS[@]} \
   ${MODEL_ARGS[@]} \
   ${CKPT_ARGS[@]} \

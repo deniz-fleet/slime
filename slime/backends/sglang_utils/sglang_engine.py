@@ -27,6 +27,13 @@ def get_base_gpu_id(args, rank):
 
 
 def launch_server_process(server_args: ServerArgs) -> multiprocessing.Process:
+    # Use spawn to avoid CUDA re-init problems in forked subprocesses
+    try:
+        multiprocessing.set_start_method("spawn", force=True)
+    except Exception:
+        # If already set elsewhere, ignore
+        pass
+
     p = multiprocessing.Process(target=launch_server, args=(server_args,))
     p.start()
 
@@ -46,8 +53,9 @@ def launch_server_process(server_args: ServerArgs) -> multiprocessing.Process:
 def _wait_server_healthy(base_url, api_key, is_process_alive):
     headers = {
         "Content-Type": "application/json; charset=utf-8",
-        "Authorization": f"Bearer {api_key}",
     }
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
 
     with requests.Session() as session:
         while True:

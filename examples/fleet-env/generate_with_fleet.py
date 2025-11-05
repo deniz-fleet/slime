@@ -50,20 +50,22 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
 
                 for turn in range(max_turns):
                     req = {
+                        "model": "/root/Qwen2.5-VL-7B-Instruct",
                         "messages": messages,
                         "tools": tools_param,
                         "tool_choice": "required",
                     }
                     print(f"{req=}")
-                    #TODO
                     # Hardcoded toy payload (no tools) per SGLang OpenAI chat completions docs
-                    req = {
-                        "model": "/root/Qwen2.5-VL-7B-Instruct",
-                        "messages": [
-                            {"role": "user", "content": "Say this is a test"}
-                        ],
-                    }
+                    # req = {
+                    #     "model": "/root/Qwen2.5-VL-7B-Instruct",
+                    #     "messages": [
+                    #         {"role": "user", "content": "Say this is a test"}
+                    #     ],
+                    #     "tools": tools_param,
+                    # }
                     resp = await post(chat_url, req)
+                    print(f"{resp=}")
                     choice = (resp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []

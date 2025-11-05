@@ -6,7 +6,14 @@ cd slime
 pip install -e .
 pip install fleet-python
 pip install -U transformers
-export FLEET_API_KEY="sk_your_key_here"
+export FLEET_API_KEY=sk_BdFKC2l8LqWzhQ36AdRB4GQHBYsBbODvrIAfXvxn3G4
+export WANDB_KEY=f66373399824f8c1942490b0862a664b8afc8802
+```
+
+```
+git checkout -- examples/fleet-env/run_fleet_qwen2_5_vl_7b_rl.sh
+chmod +x examples/fleet-env/run_fleet_qwen2_5_vl_7b_rl.sh
+./examples/fleet-env/run_fleet_qwen2_5_vl_7b_rl.sh
 ```
 
 2) RL‑only pipeline (download → export tasks → convert → run)

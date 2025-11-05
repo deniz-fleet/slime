@@ -30,6 +30,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     if not env_key:
         raise ValueError("--fleet-env is required for Fleet tool loop")
 
+    print(f"making fleet env call..")
     env = await fleet.env.make_async(env_key=env_key, image_type="mcp", ttl_seconds=3600)
     mcp_url = f"{env.urls.root}api/v1/mcp"
 

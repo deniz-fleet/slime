@@ -104,7 +104,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
             await env.close()
         except Exception:
             pass
-
+    print(f"{tool_trace=}")
     # Finalize sample
     sample.response = json.dumps({"steps": tool_trace}, ensure_ascii=False)
     sample.status = Sample.Status.COMPLETED

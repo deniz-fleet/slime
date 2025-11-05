@@ -3,8 +3,8 @@ Quickstart (Fleet MCP + Qwen3‑VL RL)
 1) Setup
 ```
 cd slime
-pip install -e .
 pip install fleet-python
+pip install -e .
 pip install -U transformers
 export FLEET_API_KEY=sk_BdFKC2l8LqWzhQ36AdRB4GQHBYsBbODvrIAfXvxn3G4
 export WANDB_KEY=f66373399824f8c1942490b0862a664b8afc8802

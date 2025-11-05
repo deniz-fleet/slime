@@ -72,7 +72,7 @@ SGLANG_ARGS=(
    --sglang-max-running-requests 128
    --sglang-disable-cuda-graph
    --debug-rollout-only
-   --sglang-tool-call-parser qwen
+   --sglang-tool-call-parser qwen25
 )
 OPTIMIZER_ARGS=(
   --optimizer adam

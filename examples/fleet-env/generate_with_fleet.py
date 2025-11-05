@@ -79,6 +79,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "messages": messages,
                         "tools": tools,
                         "tool_choice": "required",
+                        "max_tokens": 128,
                     }
                     print(f"{req=}")
                     # Hardcoded toy payload (no tools) per SGLang OpenAI chat completions docs

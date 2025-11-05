@@ -128,6 +128,7 @@ class SGLangEngine(RayActor):
     def _init_normal(self, server_args_dict):
         print(f"Launch HttpServerEngineAdapter at: {self.server_host}:{self.server_port}")
         self.process = launch_server_process(ServerArgs(**server_args_dict))
+        print(f"HttpServerEngineAdapter launched at {self.rank}..")
         if self.node_rank == 0 and self.router_ip and self.router_port:
             requests.post(
                 f"http://{self.router_ip}:{self.router_port}/add_worker?url=http://{self.server_host}:{self.server_port}"

@@ -71,6 +71,7 @@ SGLANG_ARGS=(
    --rollout-num-gpus-per-engine 1
    --sglang-mem-fraction-static 0.5
    --sglang-max-running-requests 128
+   --sglang-disable-cuda-graph
 )
 OPTIMIZER_ARGS=(
   --optimizer adam

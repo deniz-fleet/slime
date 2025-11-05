@@ -68,8 +68,34 @@ def test_build_tools_param_minimal_schema():
     fn = out[0]["function"]
     params = fn["parameters"]
 
-    # Router-safe minimal schema
-    assert params == {"type": "object", "properties": {}}
+    # Expect sanitized JSON Schema suitable for OpenAI/SGLang tool calling
+    expected = {
+        "type": "object",
+        "properties": {
+            "action": {
+                "type": "string",
+                "enum": [
+                    "screenshot",
+                    "left_click",
+                    "right_click",
+                ],
+            },
+            # anyOf(string|null) -> string
+            "text": {
+                "type": "string",
+            },
+            # prefixItems -> homogeneous integer items, preserve min/maxItems
+            "coordinate": {
+                "type": "array",
+                "items": {"type": "integer"},
+                "minItems": 2,
+                "maxItems": 2,
+            },
+        },
+        "required": ["action"],
+    }
+
+    assert params == expected
 
 
 if __name__ == "__main__":

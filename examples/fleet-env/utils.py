@@ -72,14 +72,82 @@ class ToolSpec(BaseModel):
 
 
 def build_tools_param(tools) -> List[Dict[str, Any]]:
-    # Emit minimal parameters to avoid advanced JSON-Schema features rejected by routers
-    minimal_params = {"type": "object", "properties": {}}
+    # Convert MCP tools to OpenAI/SGLang tool schema, sanitizing JSON Schema features.
+    def _first_non_null_anyof(schema_list: List[Dict[str, Any]]) -> Dict[str, Any]:
+        for sub in schema_list:
+            if sub.get("type") != "null":
+                return sub
+        # fallback to first
+        return schema_list[0] if schema_list else {"type": "string"}
+
+    def _sanitize_property(prop: Dict[str, Any]) -> Dict[str, Any]:
+        # Handle anyOf by picking a non-null simple schema
+        if "anyOf" in prop and isinstance(prop["anyOf"], list):
+            base = _first_non_null_anyof(prop["anyOf"])
+            # Merge to allow enums/types coming from anyOf
+            prop = {**prop, **base}
+
+        sanitized: Dict[str, Any] = {}
+
+        # Keep enums if present
+        if "enum" in prop:
+            sanitized["enum"] = prop["enum"]
+
+        typ = prop.get("type")
+        if typ:
+            if typ == "array":
+                sanitized["type"] = "array"
+                # Prefer homogeneous array typing
+                if "items" in prop and isinstance(prop["items"], dict):
+                    sanitized["items"] = {"type": prop["items"].get("type", "string")}
+                elif "prefixItems" in prop and isinstance(prop["prefixItems"], list):
+                    # Tuple-style → coerce to homogeneous items of the first element type
+                    first = prop["prefixItems"][0] if prop["prefixItems"] else {"type": "string"}
+                    sanitized["items"] = {"type": first.get("type", "string")}
+                if isinstance(prop.get("minItems"), int):
+                    sanitized["minItems"] = prop["minItems"]
+                if isinstance(prop.get("maxItems"), int):
+                    sanitized["maxItems"] = prop["maxItems"]
+            elif typ in ("string", "number", "integer", "boolean", "object"):
+                sanitized["type"] = typ
+            # Other types are dropped
+
+        # For objects, recursively sanitize nested properties if provided
+        if sanitized.get("type") == "object" and isinstance(prop.get("properties"), dict):
+            nested_props: Dict[str, Any] = {}
+            for k, v in prop["properties"].items():
+                if isinstance(v, dict):
+                    nested_props[k] = _sanitize_property(v)
+            sanitized["properties"] = nested_props
+            if isinstance(prop.get("required"), list):
+                sanitized["required"] = [x for x in prop["required"] if isinstance(x, str)]
+
+        return sanitized
+
+    def _sanitize_parameters(input_schema: Dict[str, Any]) -> Dict[str, Any]:
+        # Ensure top-level object schema
+        parameters: Dict[str, Any] = {"type": "object", "properties": {}}
+        if not isinstance(input_schema, dict):
+            return parameters
+        # Properties
+        raw_props = input_schema.get("properties")
+        if isinstance(raw_props, dict):
+            props: Dict[str, Any] = {}
+            for name, prop in raw_props.items():
+                if isinstance(prop, dict):
+                    props[name] = _sanitize_property(prop)
+            parameters["properties"] = props
+        # Required
+        if isinstance(input_schema.get("required"), list):
+            parameters["required"] = [x for x in input_schema["required"] if isinstance(x, str)]
+        return parameters
+
     specs: List[ToolSpec] = [
         ToolSpec(
             function=ToolFunction(
                 name=t.name,
                 description=t.description or "",
-                parameters=minimal_params,
+                parameters=_sanitize_parameters(getattr(t, "inputSchema", {}) or {}),
             )
         )
         for t in tools

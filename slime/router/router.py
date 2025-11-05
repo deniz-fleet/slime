@@ -30,7 +30,7 @@ class SlimeRouter:
     def __init__(self, args, verbose=False):
         """Initialize the slime-router with SGLang router address"""
         self.args = args
-        self.verbose = True
+        self.verbose = verbose
 
         self.app = FastAPI()
 
@@ -104,15 +104,6 @@ class SlimeRouter:
         }
         headers = {k: v for k, v in headers.items() if k.lower() not in hop_by_hop}
 
-        if self.verbose:
-            try:
-                print(f"[slime-router] → {request.method} {url}")
-                print(f"[slime-router]   headers: {sorted([h.lower() for h in headers.keys()])}")
-                # Avoid dumping large bodies; show a preview for debugging
-                preview = body[:512]
-                print(f"[slime-router]   body preview: {preview!r}{'…' if len(body) > 512 else ''}")
-            except Exception:
-                pass
 
         try:
             response = await self.client.request(request.method, url, content=body, headers=headers)
@@ -131,13 +122,6 @@ class SlimeRouter:
             ]:
                 resp_headers.pop(h, None)
 
-            if self.verbose:
-                try:
-                    print(
-                        f"[slime-router] ← {response.status_code} content-type={content_type} size={len(content)}"
-                    )
-                except Exception:
-                    pass
             try:
                 # Prefer parsing JSON if possible
                 data = json.loads(content)

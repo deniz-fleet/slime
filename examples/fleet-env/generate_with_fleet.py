@@ -39,6 +39,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
             async with ClientSession(read_stream=streams[0], write_stream=streams[1]) as session:
                 await session.initialize()
                 tools = await list_mcp_tools(session)
+                print(f"{tools=}")
                 tools_param = build_tools_param(tools)
                 print(f"{tools_param=}")
 

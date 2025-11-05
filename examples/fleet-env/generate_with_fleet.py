@@ -54,7 +54,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     req = {
                         "model":"/root/Qwen2.5-VL-7B-Instruct",
                         "messages": messages,
-                        "tools": tools,
+                        "tools": tools_param,
                         "tool_choice": "required",
                         "max_tokens": 128,
                     }

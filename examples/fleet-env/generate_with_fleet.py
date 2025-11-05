@@ -48,12 +48,37 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                 max_turns = getattr(args, "max_tool_turns", 4)
                 tool_trace: List[Dict[str, Any]] = []
 
+                tools = [
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "get_current_weather",
+                            "description": "Get the current weather in a given location",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "city": {
+                                        "type": "string",
+                                        "description": "The city to find the weather for, e.g. 'San Francisco'",
+                                    },
+                                    "unit": {
+                                        "type": "string",
+                                        "description": "The unit to fetch the temperature in",
+                                        "enum": ["celsius", "fahrenheit"],
+                                    },
+                                },
+                                "required": ["city", "unit"],
+                            },
+                        },
+                    }
+                ]
+
                 for turn in range(max_turns):
                     req = {
                         "model": "/root/Qwen2.5-VL-7B-Instruct",
                         "messages": messages,
-                        #"tools": tools_param,
-                        #"tool_choice": "required",
+                        "tools": tools,
+                        "tool_choice": "required",
                     }
                     print(f"{req=}")
                     # Hardcoded toy payload (no tools) per SGLang OpenAI chat completions docs

@@ -92,7 +92,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     #     ],
                     #     "tools": tools_param,
                     # }
-                    resp = await post(chat_url, req, max_retries=0)
+                    resp = await post(chat_url, req)
                     print(f"{resp=}")
                     choice = (resp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}

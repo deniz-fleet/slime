@@ -45,7 +45,6 @@ ROLLOUT_ARGS=(
   --rollout-max-response-len 1024
 )
 DEBUG_ARGS=(
-   --sglang-enable-metrics
    --save-debug-rollout-data /workspace/rollouts/{wandb_run_id}/
 )
 

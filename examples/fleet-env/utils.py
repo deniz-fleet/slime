@@ -52,7 +52,11 @@ def build_user_message_from_sample(sample: Any) -> Dict[str, Any]:
                         continue
         if text_parts:
             contents.insert(0, TextContent(text="".join(text_parts)))
-
+    # If no images, flatten to string content for router-safe payloads
+    has_image = any(getattr(c, "type", "") == "image_url" for c in contents)
+    if not has_image:
+        text = "".join([c.text for c in contents if isinstance(c, TextContent)])
+        return {"role": "user", "content": text}
     return UserMessage(content=contents).model_dump()
 
 
@@ -68,12 +72,14 @@ class ToolSpec(BaseModel):
 
 
 def build_tools_param(tools) -> List[Dict[str, Any]]:
+    # Emit minimal parameters to avoid advanced JSON-Schema features rejected by routers
+    minimal_params = {"type": "object", "properties": {}}
     specs: List[ToolSpec] = [
         ToolSpec(
             function=ToolFunction(
                 name=t.name,
                 description=t.description or "",
-                parameters=t.inputSchema or {"type": "object"},
+                parameters=minimal_params,
             )
         )
         for t in tools

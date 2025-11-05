@@ -52,8 +52,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     req = {
                         "model": "/root/Qwen2.5-VL-7B-Instruct",
                         "messages": messages,
-                        "tools": tools_param,
-                        "tool_choice": "required",
+                        #"tools": tools_param,
+                        #"tool_choice": "required",
                     }
                     print(f"{req=}")
                     # Hardcoded toy payload (no tools) per SGLang OpenAI chat completions docs

@@ -162,6 +162,7 @@ class FSDPTrainRayActor(TrainRayActor):
             self.sleep()
 
         self.prof = TrainProfiler(args)
+        print(f"FSDPTrainRayActor init done..")
 
         return int(getattr(self.args, "start_rollout_id", 0))
 

@@ -30,6 +30,7 @@ def launch_server_process(server_args: ServerArgs) -> multiprocessing.Process:
     p = multiprocessing.Process(target=launch_server, args=(server_args,))
     p.start()
 
+    print(f"{server_args=}")
     if server_args.node_rank != 0:
         return
 
@@ -61,6 +62,7 @@ def _wait_server_healthy(base_url, api_key, is_process_alive):
                 raise Exception("Server process terminated unexpectedly.")
 
             time.sleep(2)
+            print(f"Waiting for server to be healthy...")
 
         # use flush_cache to make sure the working queue is empty, so that we can do offload
         while True:

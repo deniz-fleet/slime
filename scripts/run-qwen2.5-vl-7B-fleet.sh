@@ -69,8 +69,8 @@ PERF_ARGS=(
 SGLANG_ARGS=(
    --rollout-num-gpus 2
    --rollout-num-gpus-per-engine 1
-   --sglang-mem-fraction-static 0.65
-)
+   --sglang-mem-fraction-static 0.5
+   --sglang-max-running-requests 128
 
 OPTIMIZER_ARGS=(
   --optimizer adam

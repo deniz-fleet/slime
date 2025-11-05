@@ -41,9 +41,9 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
             async with ClientSession(read_stream=streams[0], write_stream=streams[1]) as session:
                 await session.initialize()
                 tools = await list_mcp_tools(session)
-                print(f"{tools=}")
+                #print(f"{tools=}")
                 tools_param = build_tools_param(tools)
-                print(f"{tools_param=}")
+                #print(f"{tools_param=}")
 
                 messages: List[Dict[str, Any]] = [user_message]
 
@@ -54,11 +54,13 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     req = {
                         "model":"/root/Qwen2.5-VL-7B-Instruct",
                         "messages": messages,
-                        "tools": tools_param,
+                        "tools": tools,
                         "tool_choice": "required",
                         "max_tokens": 128,
                     }
+                    print(f"{req=}")
                     resp = await post(chat_url, req)
+                    print(f"{resp=}")
                     choice = (resp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []

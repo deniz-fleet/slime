@@ -46,8 +46,8 @@ ROLLOUT_ARGS=(
 )
 
 FLEET_ARGS=(
-  --custom-generate-function-path examples/fleet-env/generate_with_fleet.py:generate
-  --custom-rm-path examples/fleet-env/fleet_rm.py:custom_rm
+  --custom-generate-function-path examples.fleet-env.generate_with_fleet.generate
+  --custom-rm-path examples.fleet-env.fleet_rm.custom_rm
   --fleet-env amazon
   --max-tool-turns 4
 )

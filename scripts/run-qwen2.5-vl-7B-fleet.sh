@@ -67,11 +67,11 @@ PERF_ARGS=(
 )
 
 SGLANG_ARGS=(
-   --rollout-num-gpus 2
    --rollout-num-gpus-per-engine 1
    --sglang-mem-fraction-static 0.5
    --sglang-max-running-requests 128
    --sglang-disable-cuda-graph
+   --debug-rollout-only
 )
 OPTIMIZER_ARGS=(
   --optimizer adam
@@ -102,7 +102,7 @@ ray job submit --address="http://127.0.0.1:8265" \
   --runtime-env-json="${RUNTIME_ENV_JSON}" \
   -- python3 train.py \
   --actor-num-nodes 1 \
-  --actor-num-gpus-per-node 8 \
+  --actor-num-gpus-per-node 1 \
   --colocate \
   ${SGLANG_ARGS[@]} \
   ${MODEL_ARGS[@]} \

@@ -52,22 +52,22 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     {
                         "type": "function",
                         "function": {
-                            "name": "get_current_weather",
-                            "description": "Get the current weather in a given location",
+                            "name": "computer",
+                            "description": "",
                             "parameters": {
                                 "type": "object",
                                 "properties": {
-                                    "city": {
+                                    "action": {
                                         "type": "string",
-                                        "description": "The city to find the weather for, e.g. 'San Francisco'",
+                                        "enum": [
+                                            "screenshot","left_click","right_click","double_click","triple_click",
+                                            "middle_click","mouse_move","left_click_drag","type","key","scroll",
+                                            "wait","cursor_position","left_mouse_down","left_mouse_up","hold_key"
+                                        ],
                                     },
-                                    "unit": {
-                                        "type": "string",
-                                        "description": "The unit to fetch the temperature in",
-                                        "enum": ["celsius", "fahrenheit"],
-                                    },
+                                    "text": {"type": "string"},
                                 },
-                                "required": ["city", "unit"],
+                                "required": ["action"],
                             },
                         },
                     }
@@ -75,7 +75,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
 
                 for turn in range(max_turns):
                     req = {
-                        "model": "/root/Qwen2.5-VL-7B-Instruct",
+                        "model": "default",
                         "messages": messages,
                         "tools": tools,
                         "tool_choice": "required",

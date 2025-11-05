@@ -24,6 +24,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     """
     chat_url = f"http://{args.sglang_router_ip}:{args.sglang_router_port}/v1/chat/completions"
     user_message = build_user_message_from_sample(sample)
+    print(f"{args.sglang_router_ip=}")
+    print(f"{args.sglang_router_port=}")
 
     # Create Fleet env and MCP session; list tools once
     env_key = getattr(args, "fleet_env", None) or getattr(args, "fleet_env_key", None)
@@ -95,6 +97,10 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     choice = (resp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []
+
+                    import time
+                    print(f"z"*10)
+                    time.sleep(10000000)
 
                     # Append assistant message with tool_calls to maintain context
                     messages.append({"role": "assistant", "content": msg.get("content"), "tool_calls": tool_calls})

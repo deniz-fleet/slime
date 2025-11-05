@@ -18,14 +18,19 @@ def run_router(args):
     slime_router = SlimeRouter(args, verbose=False)
 
     # Start the server
-    uvicorn.run(slime_router.app, host=args.sglang_router_ip, port=args.sglang_router_port, log_level="info")
+    uvicorn.run(
+        slime_router.app,
+        host=args.sglang_router_ip,
+        port=args.sglang_router_port,
+        log_level="debug" if getattr(args, "verbose", False) else "info",
+    )
 
 
 class SlimeRouter:
     def __init__(self, args, verbose=False):
         """Initialize the slime-router with SGLang router address"""
         self.args = args
-        self.verbose = verbose
+        self.verbose = True
 
         self.app = FastAPI()
 
@@ -56,13 +61,19 @@ class SlimeRouter:
         # sglang-router api
         self.app.post("/add_worker")(self.add_worker)
         self.app.get("/list_workers")(self.list_workers)
+        self.app.get("/health")(self.health_check)
         self.app.post("/retrieve_from_text")(self.retrieve_from_text)
         # Catch-all route for proxying to SGLang - must be registered LAST
         self.app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])(self.proxy)
 
     async def health_check(self, request: Request):
-        # TODO: do health check in background
-        pass
+        # Lightweight health endpoint
+        return {
+            "status": "ok",
+            "num_workers": len(self.worker_urls),
+            "workers": self.worker_urls,
+            "max_weight_version": self.max_weight_version,
+        }
 
     async def proxy(self, request: Request, path: str):
         """Proxy all other requests to the SGLang router"""
@@ -75,25 +86,72 @@ class SlimeRouter:
         body = await request.body()
         headers = dict(request.headers)
 
+        # Sanitize hop-by-hop headers that should not be forwarded
+        # https://www.rfc-editor.org/rfc/rfc9112.html#name-hop-by-hop-header-fields
+        hop_by_hop = {
+            "connection",
+            "keep-alive",
+            "proxy-authenticate",
+            "proxy-authorization",
+            "te",
+            "trailers",
+            "transfer-encoding",
+            "upgrade",
+            # Also strip/let client lib set these correctly
+            "host",
+            "content-length",
+            "accept-encoding",
+        }
+        headers = {k: v for k, v in headers.items() if k.lower() not in hop_by_hop}
+
+        if self.verbose:
+            try:
+                print(f"[slime-router] → {request.method} {url}")
+                print(f"[slime-router]   headers: {sorted([h.lower() for h in headers.keys()])}")
+                # Avoid dumping large bodies; show a preview for debugging
+                preview = body[:512]
+                print(f"[slime-router]   body preview: {preview!r}{'…' if len(body) > 512 else ''}")
+            except Exception:
+                pass
+
         try:
             response = await self.client.request(request.method, url, content=body, headers=headers)
             # Eagerly read content so we can return JSON (not streaming)
             content = await response.aread()
             content_type = response.headers.get("content-type", "")
+
+            # Sanitize response headers before returning to client
+            resp_headers = dict(response.headers)
+            for h in [
+                "content-length",
+                "transfer-encoding",
+                "content-encoding",
+                "connection",
+                "keep-alive",
+            ]:
+                resp_headers.pop(h, None)
+
+            if self.verbose:
+                try:
+                    print(
+                        f"[slime-router] ← {response.status_code} content-type={content_type} size={len(content)}"
+                    )
+                except Exception:
+                    pass
             try:
                 # Prefer parsing JSON if possible
                 data = json.loads(content)
                 return JSONResponse(
                     content=data,
                     status_code=response.status_code,
-                    headers=dict(response.headers),
+                    headers=resp_headers,
                 )
             except Exception:
                 # Fall back to raw body with original content type
                 return Response(
                     content=content,
                     status_code=response.status_code,
-                    headers=dict(response.headers),
+                    headers=resp_headers,
                     media_type=content_type or None,
                 )
 

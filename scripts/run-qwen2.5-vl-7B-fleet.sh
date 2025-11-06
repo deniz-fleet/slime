@@ -77,6 +77,7 @@ SGLANG_ARGS=(
    --sglang-max-prefill-tokens 128
    --debug-rollout-only
    --sglang-tool-call-parser qwen25
+   --sglang-allow-auto-truncate
 )
 OPTIMIZER_ARGS=(
   --optimizer adam

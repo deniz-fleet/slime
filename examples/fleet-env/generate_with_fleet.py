@@ -55,6 +55,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                 tool_trace: List[Dict[str, Any]] = []
 
                 for turn in range(max_turns):
+                    def _ppt(msg: str):
+                        _pp(f"[turn={turn}] {msg}")
                     req = {
                         "model":"/root/Qwen2.5-VL-7B-Instruct",
                         "messages": messages,
@@ -63,7 +65,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     }
                     # model call.
                     mosresp = await post(chat_url, req)
-                    _pp(f"{resp=}")
+                    _ppt(f"{resp=}")
                     choice = (resp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []
@@ -83,7 +85,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             parsed_args = json.loads(arguments) if isinstance(arguments, str) else arguments
                         except Exception:
                             parsed_args = {}
-                        _pp(f"calling tool {name} with args {parsed_args}")
+                        _ppt(f"calling tool {name} with args {parsed_args}")
                         result = await session.call_tool(name, parsed_args)
                         # Avoid printing raw/binary blobs
                         # Extract textual observation and optional screenshot
@@ -112,7 +114,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         try:
                             preview = (result_str or "")[:512]
                             suffix = "…" if (result_str and len(result_str) > 512) else ""
-                            _pp(f"tool result text: {preview}{suffix}")
+                            _ppt(f"tool result text: {preview}{suffix}")
                         except Exception:
                             pass
 
@@ -140,7 +142,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                     ],
                                 })
                                 trace_entry["image_inline"] = True
-                                _pp("tool screenshot: inline data URL attached")
+                                _ppt("tool screenshot: inline data URL attached")
                             except Exception:
                                 pass
 

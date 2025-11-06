@@ -35,7 +35,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     
 
     def _pp(msg: str):
-        print(f"[pid={os.getpid()}] {msg}")
+        print(f"[pid={os.getpid()}][task_key={sample.metadata.get("task_key", "unknown")}] {msg}")
 
 
     # Create Fleet env and MCP session; list tools once
@@ -46,7 +46,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     _pp("making fleet env call..")
     env = await fleet.env.make_async(env_key=env_key, image_type="mcp", ttl_seconds=3600)
     mcp_url = f"{env.urls.root}api/v1/mcp"
-
+    
     try:
         async with streamablehttp_client(url=mcp_url) as streams:
             async with ClientSession(read_stream=streams[0], write_stream=streams[1]) as session:
@@ -242,6 +242,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     sample.metadata.setdefault("env_key", env_key)
     if isinstance(final_answer, str) and final_answer:
         sample.metadata["final_answer"] = final_answer
+    
+    cntr += 1
 
     return sample
 

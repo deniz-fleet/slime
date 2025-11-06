@@ -13,9 +13,9 @@ COMPUTER_TOOL_USAGE_GUIDE = """## Computer Control Tool Usage Guide
 
 ### Screen Information
 
-- Resolution: 1366x768 pixels (scaled from 1920x1080)
+- Resolution: 768x768 pixels
 
-- Coordinate system: (0,0) is top-left, (1365,767) is bottom-right
+- Coordinate system: (0,0) is top-left, (767,767) is bottom-right
 
 - All coordinates must be integers within valid ranges
 
@@ -126,6 +126,11 @@ COMPUTER_TOOL_USAGE_GUIDE = """## Computer Control Tool Usage Guide
 # Scroll down 5 steps
 
 {"action": "scroll", "scroll_direction": "down", "scroll_amount": 5}
+
+
+### Completion
+
+- done: Signal final completion and include a brief summary of the outcome. Only call this when the user's task is truly finished. If a page is still loading or more steps remain, keep using actions like `screenshot`, `wait`, `click`, `type`, and `scroll` instead of calling `done`.
 """
 
 
@@ -314,17 +319,7 @@ def build_user_message_from_sample(sample: Any, tools: Optional[List[Any]] = Non
                     line += f" — {desc}"
                 lines.append(line)
 
-            # Always expose the synthetic 'done' tool to the model in the prompt.
-            lines.append(
-                "- done: required=['summary'] props=['summary'] — Signal completion; "
-                "include a brief summary of the outcome."
-            )
-
-            # Brief instruction on how to end the session
-            lines.append(
-                "When you believe the task is complete, call the tool 'done' with a 'summary'. "
-                "If not complete, continue using other tools."
-            )
+            # moved 'done' guidance into COMPUTER_TOOL_USAGE_GUIDE to avoid premature termination
 
             contents.append(TextContent(text="\n".join(lines)))
             # Append a fixed usage guide for the common computer tool

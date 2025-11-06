@@ -131,6 +131,26 @@ Wrong (coordinates with type/key/screenshot/wait):
 - Use valid, concise JSON for `arguments`.
 - If multiple actions are needed, emit one call now; wait for the tool result next turn before emitting another.
 - To finish, use the same format with `{"name":"done","arguments":{"summary":"..."}}`.
+
+### Tool Call Grammar Enforcement (clarification)
+
+- The grammar strictly enforces ONLY the content inside `<tool_call> … </tool_call>`. Any text outside the tag is unconstrained and ignored by the tool caller.
+- If you do NOT output the `<tool_call>` block, no tool will run. Actions written as plain JSON or code fences outside the tag are ignored.
+- Always use real tool names (e.g., `"computer"`, `"done"`). Never output placeholders like `"TOOL_NAME"`.
+- Do NOT wrap the tool call block in markdown code fences. Emit the tag and JSON exactly, with no backticks or extra formatting.
+
+Wrong (plain JSON in prose, no tag — ignored):
+{"action":"left_click","coordinate":[500,300]}
+
+Wrong (placeholder tool name — ignored or rejected):
+<tool_call>
+{"name":"TOOL_NAME","arguments":{"action":"left_click","coordinate":[500,300]}}
+</tool_call>
+
+Correct (tag + real tool name + valid arguments):
+<tool_call>
+{"name":"computer","arguments":{"action":"left_click","coordinate":[500,300]}}
+</tool_call>
 """
 
 

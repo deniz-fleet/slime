@@ -55,7 +55,9 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                 _pp(f"{tools=}")
                 tools_param = build_tools_param(tools)
                 user_message = build_user_message_from_sample(sample, tools)
+            
                 _pp(f"{sample=}")
+                _pp(f"{user_message=}")
                 #print(f"{tools_param=}")
 
                 messages: List[Dict[str, Any]] = [user_message]

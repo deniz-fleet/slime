@@ -58,6 +58,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "tool_choice": "required",
                     }
                     print(f"{req=}")
+                    # model call.
                     resp = await post(chat_url, req)
                     print(f"{resp=}")
                     choice = (resp.get("choices") or [{}])[0]
@@ -134,7 +135,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                     env_key=str(env_key),
                                     rollout_id=int(rollout_id),
                                     turn=int(turn),
-                                    root_dir=getattr(args, "screenshot_root", "/workspace/images"),
+                                    root_dir=getattr(args, "screenshot_root", "/sgl-workspace/images"),
                                 )
                                 messages.append({
                                     "role": "user",

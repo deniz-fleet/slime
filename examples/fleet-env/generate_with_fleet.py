@@ -55,6 +55,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                 _pp(f"{tools=}")
                 tools_param = build_tools_param(tools)
                 user_message = build_user_message_from_sample(sample, tools)
+                _pp(f"{sample=}")
                 #print(f"{tools_param=}")
 
                 messages: List[Dict[str, Any]] = [user_message]
@@ -166,7 +167,6 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             safe_image_url = normalize_image_reference_to_image_url(base64_data_url)
 
                         if isinstance(safe_image_url, str):
-                            try:
                                 messages.append({
                                     "role": "user",
                                     "content": [

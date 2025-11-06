@@ -42,7 +42,7 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
     try:
         # Verify and extract a numeric score
         detailed = await task.verify_detailed_async(env)
-        print(f"detailed: {detailed}")
+        print(f"detailed verification response: {detailed}")
 
         return 1
 

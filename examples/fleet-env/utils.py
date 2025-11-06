@@ -123,9 +123,9 @@ Wrong (coordinates with type/key/screenshot/wait):
 ### Tool Call Output (Qwen 2.5 parser)
 
 - Emit exactly ONE tool call per assistant turn.
-- Wrap it EXACTLY as:
+- Wrap it EXACTLY as below. This is an example of a tool call:
 <tool_call>
-{"name":"TOOL_NAME","arguments":{...}}
+{"name":"computer","arguments":{"action":"left_click","coordinate":[500,300]}}
 </tool_call>
 - Reason first, then act: write 1–2 concise sentences of rationale, then emit the tool call block. Avoid extra text after the block.
 - Use valid, concise JSON for `arguments`.
@@ -144,7 +144,7 @@ Wrong (plain JSON in prose, no tag — ignored):
 
 Wrong (placeholder tool name — ignored or rejected):
 <tool_call>
-{"name":"TOOL_NAME","arguments":{"action":"left_click","coordinate":[500,300]}}
+{"name":"computer","arguments":{"action":"left_click","coordinate":[500,300]}}
 </tool_call>
 
 Correct (tag + real tool name + valid arguments):

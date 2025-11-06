@@ -38,9 +38,9 @@ ROLLOUT_ARGS=(
   --prompt-data /root/fleet_tasks.jsonl
   --input-key prompt
   --metadata-key metadata
-  --rollout-batch-size 4
-  --n-samples-per-prompt 2
-  --global-batch-size 8
+  --rollout-batch-size 1
+  --n-samples-per-prompt 1
+  --global-batch-size 1
   --num-rollout 50
   --rollout-max-response-len 16384
 )
@@ -81,6 +81,7 @@ SGLANG_ARGS=(
 )
 OPTIMIZER_ARGS=(
   --optimizer adam
+
   --lr 1e-6
 )
 

@@ -56,7 +56,6 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "messages": messages,
                         "tools": tools_param,
                         "tool_choice": "required",
-                        "max_tokens": 128,
                     }
                     print(f"{req=}")
                     resp = await post(chat_url, req)
@@ -72,23 +71,33 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         break
 
                     # Execute tool calls and add role='tool' messages
-                    for tc in tool_calls:
+                    # forcing a single tool call for now
+                    for tc in tool_calls[:1]:
                         name = (tc.get("function") or {}).get("name")
                         arguments = (tc.get("function") or {}).get("arguments") or "{}"
                         try:
                             parsed_args = json.loads(arguments) if isinstance(arguments, str) else arguments
                         except Exception:
                             parsed_args = {}
-
+                        print(f"calling tool {name} with args {parsed_args}")
                         result = await session.call_tool(name, parsed_args)
-                        # Convert result to a concise string for message content
+                        print(f"{result=}")
+                        # Extract textual observation and optional screenshot
                         result_str = None
+                        base64_data_url = None
                         try:
                             if getattr(result, "content", None):
                                 for c in result.content:
-                                    if hasattr(c, "text") and c.text:
+                                    if hasattr(c, "text") and c.text and not result_str:
                                         result_str = c.text
-                                        break
+                                    # Some MCP tools pack JSON in text; try to pull base64_image
+                                    if hasattr(c, "text") and c.text and ("base64_image" in c.text):
+                                        try:
+                                            parsed = json.loads(c.text)
+                                            if isinstance(parsed, dict) and isinstance(parsed.get("base64_image"), str):
+                                                base64_data_url = parsed.get("base64_image")
+                                        except Exception:
+                                            pass
                                 result_str = result_str or json.dumps([c.model_dump() for c in result.content])
                             else:
                                 result_str = str(result)
@@ -101,12 +110,40 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             "content": result_str,
                         })
 
-                        tool_trace.append({
+                        trace_entry = {
                             "turn": turn,
                             "name": name,
                             "arguments": parsed_args,
-                            "result": result_str,
-                        })
+                            "result_text": result_str,
+                        }
+
+                        # If we have a screenshot, save to local file and add as a user multimodal message
+                        if isinstance(base64_data_url, str) and base64_data_url.startswith("data:"):
+                            try:
+                                header, b64 = base64_data_url.split(",", 1)
+                                mime = header.split(";")[0].split(":")[1] if ";" in header else "image/jpeg"
+                                ext = ".png" if "png" in mime else ".jpg"
+                                import os, base64
+                                run_root = getattr(args, "dump_details", None) or "."
+                                rollout_id = getattr(sample, "index", 0)
+                                out_dir = os.path.join(run_root, "fleet_env_screens", str(env_key), str(rollout_id))
+                                os.makedirs(out_dir, exist_ok=True)
+                                out_path = os.path.join(out_dir, f"turn_{turn}{ext}")
+                                with open(out_path, "wb") as f:
+                                    f.write(base64.b64decode(b64))
+
+                                messages.append({
+                                    "role": "user",
+                                    "content": [
+                                        {"type": "image_url", "image_url": {"url": f"file://{out_path}"}},
+                                        {"type": "text", "text": "Observation screenshot"},
+                                    ],
+                                })
+                                trace_entry["image_file"] = f"file://{out_path}"
+                            except Exception:
+                                pass
+
+                        tool_trace.append(trace_entry)
     finally:
         try:
             await env.close()

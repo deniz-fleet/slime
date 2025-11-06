@@ -42,7 +42,7 @@ ROLLOUT_ARGS=(
   --n-samples-per-prompt 2
   --global-batch-size 8
   --num-rollout 50
-  --rollout-max-response-len 1024
+  --rollout-max-response-len 131072
 )
 DEBUG_ARGS=(
    --save-debug-rollout-data /workspace/rollouts/{wandb_run_id}/
@@ -74,6 +74,7 @@ SGLANG_ARGS=(
    --sglang-mem-fraction-static 0.5
    --sglang-max-running-requests 128
    --sglang-disable-cuda-graph
+   --sglang-max-prefill-tokens 128
    --debug-rollout-only
    --sglang-tool-call-parser qwen25
 )

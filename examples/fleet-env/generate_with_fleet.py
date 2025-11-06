@@ -59,9 +59,12 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
 
                 messages: List[Dict[str, Any]] = [user_message]
 
-                max_turns = getattr(args, "max_tool_turns", 20)
+                # Support both max_tool_turns and max_turns for configuration
+                max_turns = 20
                 tool_trace: List[Dict[str, Any]] = []
 
+                finished = False
+                done_summary: str = ""
                 for turn in range(max_turns):
                     def _ppt(msg: str):
                         _pp(f"[turn={turn}] {msg}")
@@ -85,7 +88,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     messages.append({"role": "assistant", "content": (msg.get("content") or ""), "tool_calls": tool_calls})
 
                     if not tool_calls:
-                        break
+                        _ppt("no tool_calls; continuing to next turn")
+                        continue
 
                     # Execute tool calls and add role='tool' messages
                     # forcing a single tool call for now
@@ -97,6 +101,23 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         except Exception:
                             parsed_args = {}
                         _ppt(f"calling tool {name} with args {parsed_args}")
+                        # Intercept synthetic 'done' tool to finish the loop gracefully.
+                        if name == "done":
+                            done_summary = str(parsed_args.get("summary", "")).strip()
+                            messages.append({
+                                "role": "tool",
+                                "tool_call_id": tc.get("id"),
+                                "content": done_summary,
+                            })
+                            tool_trace.append({
+                                "turn": turn,
+                                "name": name,
+                                "arguments": parsed_args,
+                                "result_text": done_summary,
+                            })
+                            finished = True
+                            break
+
                         result = await session.call_tool(name, parsed_args)
                         # Avoid printing raw/binary blobs
                         # Extract textual observation and optional screenshot
@@ -164,6 +185,10 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                 pass
 
                         tool_trace.append(trace_entry)
+
+                    if finished:
+                        _ppt("received 'done' signal; stopping tool loop")
+                        break
     finally:
         try:
             await env.close()

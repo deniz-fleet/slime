@@ -314,6 +314,18 @@ def build_user_message_from_sample(sample: Any, tools: Optional[List[Any]] = Non
                     line += f" — {desc}"
                 lines.append(line)
 
+            # Always expose the synthetic 'done' tool to the model in the prompt.
+            lines.append(
+                "- done: required=['summary'] props=['summary'] — Signal completion; "
+                "include a brief summary of the outcome."
+            )
+
+            # Brief instruction on how to end the session
+            lines.append(
+                "When you believe the task is complete, call the tool 'done' with a 'summary'. "
+                "If not complete, continue using other tools."
+            )
+
             contents.append(TextContent(text="\n".join(lines)))
             # Append a fixed usage guide for the common computer tool
             if any(getattr(t, "name", "") == "computer" for t in tools):
@@ -455,6 +467,26 @@ def build_tools_param(tools) -> List[Dict[str, Any]]:
         )
         for t in tools
     ]
+    # Add a synthetic "done" tool so the model can explicitly signal completion.
+    # This is not an MCP tool; it is intercepted by the caller.
+    specs.append(
+        ToolSpec(
+            function=ToolFunction(
+                name="done",
+                description=(
+                    "Signal that the task is complete. Provide a brief 'summary' of "
+                    "what was accomplished or why no further actions are needed."
+                ),
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "summary": {"type": "string"},
+                    },
+                    "required": ["summary"],
+                },
+            )
+        )
+    )
     return [s.model_dump() for s in specs]
 
 

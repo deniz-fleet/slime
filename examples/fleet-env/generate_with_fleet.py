@@ -16,6 +16,7 @@ from .utils import (
     build_tools_param,
     save_data_url_to_image_path,
     normalize_image_reference_to_image_url,
+    manage_context,
 )
 
 async def _list_mcp_tools(session: ClientSession):
@@ -58,15 +59,17 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
 
                 messages: List[Dict[str, Any]] = [user_message]
 
-                max_turns = getattr(args, "max_tool_turns", 4)
+                max_turns = getattr(args, "max_tool_turns", 20)
                 tool_trace: List[Dict[str, Any]] = []
 
                 for turn in range(max_turns):
                     def _ppt(msg: str):
                         _pp(f"[turn={turn}] {msg}")
+                    retain_n_turns = getattr(args, "retain_n_turns", 3)
+                    window_messages = manage_context(messages, retain_n_turns)
                     req = {
                         "model":"/root/Qwen2.5-VL-7B-Instruct",
-                        "messages": messages,
+                        "messages": window_messages,
                         "tools": tools_param,
                         "tool_choice": "required",
                         "max_tokens": 128,
@@ -170,8 +173,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
             await env.close()
         except Exception:
             pass
-    _pp(f"{tool_trace=}")
     # Finalize sample
+    _pp(f"finalizing sample with {len(tool_trace)} tool calls")
     sample.response = json.dumps({"steps": tool_trace}, ensure_ascii=False)
     sample.status = Sample.Status.COMPLETED
     sample.metadata.setdefault("tool_trace", tool_trace)

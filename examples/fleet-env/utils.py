@@ -159,13 +159,41 @@ def img_path_to_data_url(path: str) -> str:
 def normalize_image_reference_to_image_url(image_ref: str) -> Optional[str]:
     """Normalize various image references into an OpenAI-style image_url.url string.
 
+    The OpenAI-compatible chat API expects images to be provided via
+    `{"type": "image_url", "image_url": {"url": STRING}}` where STRING is a
+    network URL or a data URL. This helper takes whatever an MCP tool or caller
+    returns and converts it into that STRING.
+
     Accepts:
     - data URLs (returned as-is)
     - http/https URLs (returned as-is)
     - file:// URLs (converted to data URL if file exists)
     - absolute local paths (converted to data URL if file exists)
     - raw base64 strings (wrapped as data:image/jpeg;base64,...)
+
     Returns None if the input cannot be normalized.
+
+    Examples:
+    - Given a tool JSON like:
+      {"base64_image": "data:image/jpeg;base64,/9j/4AAQ..."}
+      → returns the same data URL string.
+
+    - Given a public URL:
+      "https://example.com/screenshot.jpg"
+      → returns the same URL.
+
+    - Given a local file URL:
+      "file:///workspace/snap.png"
+      → loads from disk and returns a data URL such as
+        "data:image/png;base64,iVBORw0KGgoAAAANS...".
+
+    - Given an absolute path:
+      "/workspace/snap.png"
+      → loads from disk and returns a data URL.
+
+    - Given a raw base64 blob (no prefix):
+      "/9j/4AAQSkZJRgABAQAAAQABAAD/..."
+      → wraps as "data:image/jpeg;base64,/9j/4AAQ...".
     """
     if not isinstance(image_ref, str):
         return None
@@ -199,6 +227,47 @@ def normalize_image_reference_to_image_url(image_ref: str) -> Optional[str]:
         # Best-effort wrap; do not validate entire payload for speed
         return f"data:image/jpeg;base64,{ref}"
     return None
+
+
+def manage_context(messages: List[Dict[str, Any]], retain_n_turns: int = 1) -> List[Dict[str, Any]]:
+    """Return a minimal message window for the model.
+
+    Policy (simple and robust):
+    - Always keep the very first user message (index 0) as context.
+    - From the rest, keep only messages that are likely useful for tool flows:
+      latest assistant, tool, and user image messages.
+    - Limit to the last 2 * retain_n_turns of those filtered messages.
+
+    This yields:
+    - Turn 0: 1 message (the first user message).
+    - Later turns: up to 3 messages total (first + latest assistant + latest image/tool) per turn retained.
+    """
+    if not isinstance(messages, list) or not messages:
+        return []
+    if retain_n_turns <= 0:
+        return [messages[0]]
+
+    def _is_user_image_message(m: Dict[str, Any]) -> bool:
+        if m.get("role") != "user":
+            return False
+        content = m.get("content")
+        if isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict) and part.get("type") == "image_url":
+                    return True
+        return False
+
+    base = [messages[0]]
+    rest = messages[1:]
+    filtered: List[Dict[str, Any]] = []
+    for msg in rest:
+        role = msg.get("role")
+        if role == "assistant" or role == "tool" or _is_user_image_message(msg):
+            filtered.append(msg)
+
+    tail_count = max(0, 2 * int(retain_n_turns))
+    window_tail = filtered[-tail_count:] if tail_count > 0 else []
+    return base + window_tail
 
 
 def build_user_message_from_sample(sample: Any, tools: Optional[List[Any]] = None) -> Dict[str, Any]:

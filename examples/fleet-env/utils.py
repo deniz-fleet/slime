@@ -5,8 +5,51 @@ import mimetypes
 import os
 import re
 from typing import Any, Dict, List, Union, Optional
+import aiohttp
 
 from pydantic import BaseModel
+
+S3_BUCKET_URL = "https://theseus-model-traces.s3.amazonaws.com/"
+FLEET_API_URL = "https://orchestrator.fleetai.com/admin/s3/presigned-upload-url"
+
+async def upload_image_to_s3(
+    session: aiohttp.ClientSession, image_data: str, s3_path: str, api_key: str
+) -> Optional[str]:
+    """
+    Upload an image to S3 using Fleet API presigned URL.
+    Returns the public URL on success, or None on failure.
+    """
+    try:
+        # Request presigned POST from Fleet
+        async with session.post(
+            FLEET_API_URL,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={"path": s3_path, "expires_in": 3600, "content_type": "image/jpeg"},
+        ) as resp:
+            if resp.status != 200:
+                return None
+            presigned = await resp.json()
+
+        # Decode base64 payload
+        import base64
+        image_bytes = base64.b64decode(image_data)
+
+        # Upload to S3 using presigned URL and fields
+        form = aiohttp.FormData()
+        for k, v in presigned.get("fields", {}).items():
+            form.add_field(k, v)
+        form.add_field("file", image_bytes, content_type="image/jpeg")
+        async with session.post(presigned["url"], data=form) as upload_resp:
+            if upload_resp.status not in (200, 204):
+                return None
+
+        # Return public URL
+        return f"{S3_BUCKET_URL}{s3_path}"
+    except Exception:
+        return None
 
 
 COMPUTER_TOOL_USAGE_GUIDE = """## Computer Control Tool Usage Guide

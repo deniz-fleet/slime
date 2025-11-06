@@ -8,7 +8,7 @@ from mcp.client.streamable_http import streamablehttp_client
 
 from slime.utils.http_utils import post
 from slime.utils.types import Sample
-from .utils import build_user_message_from_sample, list_mcp_tools, build_tools_param
+from .utils import build_user_message_from_sample, list_mcp_tools, build_tools_param, save_data_url_to_image_path
 
 async def _list_mcp_tools(session: ClientSession):
     listed = await session.list_tools()
@@ -81,7 +81,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             parsed_args = {}
                         print(f"calling tool {name} with args {parsed_args}")
                         result = await session.call_tool(name, parsed_args)
-                        print(f"{result=}")
+                        # Avoid printing raw/binary blobs
                         # Extract textual observation and optional screenshot
                         result_str = None
                         base64_data_url = None
@@ -104,6 +104,14 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         except Exception:
                             result_str = str(result)
 
+                        # Log safe text preview only
+                        try:
+                            preview = (result_str or "")[:512]
+                            suffix = "…" if (result_str and len(result_str) > 512) else ""
+                            print(f"tool result text: {preview}{suffix}")
+                        except Exception:
+                            pass
+
                         messages.append({
                             "role": "tool",
                             "tool_call_id": tc.get("id"),
@@ -117,21 +125,17 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             "result_text": result_str,
                         }
 
-                        # If we have a screenshot, save to local file and add as a user multimodal message
+                        # If we have a screenshot, save under a shared path and add as user multimodal
                         if isinstance(base64_data_url, str) and base64_data_url.startswith("data:"):
                             try:
-                                header, b64 = base64_data_url.split(",", 1)
-                                mime = header.split(";")[0].split(":")[1] if ";" in header else "image/jpeg"
-                                ext = ".png" if "png" in mime else ".jpg"
-                                import os, base64
-                                run_root = getattr(args, "dump_details", None) or "."
                                 rollout_id = getattr(sample, "index", 0)
-                                out_dir = os.path.join(run_root, "fleet_env_screens", str(env_key), str(rollout_id))
-                                os.makedirs(out_dir, exist_ok=True)
-                                out_path = os.path.join(out_dir, f"turn_{turn}{ext}")
-                                with open(out_path, "wb") as f:
-                                    f.write(base64.b64decode(b64))
-
+                                out_path = save_data_url_to_image_path(
+                                    data_url=base64_data_url,
+                                    env_key=str(env_key),
+                                    rollout_id=int(rollout_id),
+                                    turn=int(turn),
+                                    root_dir=getattr(args, "screenshot_root", "/workspace/images"),
+                                )
                                 messages.append({
                                     "role": "user",
                                     "content": [
@@ -140,6 +144,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                     ],
                                 })
                                 trace_entry["image_file"] = f"file://{out_path}"
+                                print(f"tool screenshot: file://{out_path}")
                             except Exception:
                                 pass
 

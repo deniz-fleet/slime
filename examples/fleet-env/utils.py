@@ -1,4 +1,5 @@
 import base64
+from pathlib import Path
 import json
 import mimetypes
 from typing import Any, Dict, List, Union
@@ -58,6 +59,40 @@ def build_user_message_from_sample(sample: Any) -> Dict[str, Any]:
         text = "".join([c.text for c in contents if isinstance(c, TextContent)])
         return {"role": "user", "content": text}
     return UserMessage(content=contents).model_dump()
+
+
+def save_data_url_to_image_path(
+    data_url: str,
+    env_key: str,
+    rollout_id: int,
+    turn: int,
+    root_dir: str = "/workspace/images",
+) -> str:
+    """Save a data:image/...;base64,... URL to a deterministic local file.
+
+    Returns absolute path to the saved file.
+    """
+    if not isinstance(data_url, str) or not data_url.startswith("data:"):
+        raise ValueError("data_url must be a data: URI")
+
+    header, b64 = data_url.split(",", 1)
+    mime = "image/jpeg"
+    try:
+        if ";" in header:
+            mime = header.split(";")[0].split(":")[1]
+        else:
+            mime = header.split(":")[1]
+    except Exception:
+        mime = "image/jpeg"
+
+    ext = ".png" if "png" in mime else ".jpg"
+    out_dir = Path(root_dir) / str(env_key) / str(rollout_id)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"turn_{turn}{ext}"
+
+    out_path.write_bytes(base64.b64decode(b64))
+
+    return str(out_path.resolve())
 
 
 class ToolFunction(BaseModel):

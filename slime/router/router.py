@@ -30,7 +30,7 @@ class SlimeRouter:
     def __init__(self, args, verbose=False):
         """Initialize the slime-router with SGLang router address"""
         self.args = args
-        self.verbose = True
+        self.verbose = False
 
         self.app = FastAPI()
 

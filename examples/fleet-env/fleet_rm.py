@@ -14,6 +14,7 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
     meta = sample.metadata if isinstance(sample.metadata, dict) else {}
     task_key: Optional[str] = meta.get("task_key")
     env_key: Optional[str] = meta.get("env_key")
+    print(f"processing {task_key=} and {env_key=}")
 
     if not task_key:
         raise ValueError("Missing task_key; include in sample.metadata['task_key'] or --task-key")

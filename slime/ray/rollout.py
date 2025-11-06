@@ -2,6 +2,7 @@ import logging
 import multiprocessing
 import random
 import time
+import base64
 from pathlib import Path
 from typing import List, Union
 
@@ -506,6 +507,39 @@ def _log_rollout_data(rollout_id, args, samples, rollout_extra_metrics, rollout_
         log_dict["perf/tokens_per_gpu_per_sec"] = sum(response_lengths) / rollout_time / args.rollout_num_gpus
     log_dict["perf/longest_sample_tokens_per_sec"] = max(response_lengths) / rollout_time
     log_dict |= dict_add_prefix(compute_statistics(response_lengths), f"rollout/response_len/")
+    # Add tool turn statistics (mean/median across samples)
+    try:
+        turn_counts = []
+        last_image_data_url = None
+        for sample in samples:
+            metadata = getattr(sample, "metadata", {}) or {}
+            tool_trace = metadata.get("tool_trace") or []
+            turn_counts.append(len(tool_trace))
+            # capture last screenshot data URL from the trace if present
+            for entry in tool_trace:
+                url = (entry or {}).get("image_url")
+                if isinstance(url, str) and url.startswith("data:"):
+                    last_image_data_url = url
+        if turn_counts:
+            log_dict |= dict_add_prefix(
+                compute_statistics([float(c) for c in turn_counts]), f"rollout/tool_turns/"
+            )
+        # Save the last screenshot image (if any) to /workspace/rollouts/images/rollout_<rollout_id>.(png|jpg)
+        if isinstance(last_image_data_url, str) and last_image_data_url.startswith("data:"):
+            try:
+                header, b64 = last_image_data_url.split(",", 1)
+                ext = ".png" if "png" in header else ".jpg"
+                out_dir = Path("/workspace/rollouts/images")
+                out_dir.mkdir(parents=True, exist_ok=True)
+                out_path = out_dir / f"rollout_{rollout_id}{ext}"
+                out_path.write_bytes(base64.b64decode(b64))
+                log_dict["rollout/last_image_path"] = str(out_path)
+            except Exception:
+                # ignore image save errors
+                pass
+    except Exception:
+        # best-effort: do not break logging if metadata is missing
+        pass
     log_dict |= _compute_zero_std_metrics(args, samples)
     log_dict |= _compute_spec_metrics(args, samples)
     log_dict |= dict_add_prefix(_compute_reward_cat_metrics(args, samples), f"rollout/")

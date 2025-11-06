@@ -100,31 +100,27 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         result = await session.call_tool(name, parsed_args)
                         # Avoid printing raw/binary blobs
                         # Extract textual observation and optional screenshot
-                        result_str = None
+                        result_str = ""
                         base64_data_url = None
-                        try:
-                            if getattr(result, "content", None):
-                                for c in result.content:
-                                    if hasattr(c, "text") and c.text and not result_str:
-                                        # Prefer the first textual observation that is not a base64 blob
-                                        if "base64_image" in c.text or c.text.startswith("data:image"):
-                                            # skip setting result_str from this chunk
-                                            pass
-                                        else:
-                                            result_str = c.text
-                                    # Some MCP tools pack JSON in text; try to pull base64_image
-                                    if hasattr(c, "text") and c.text and ("base64_image" in c.text):
-                                        try:
-                                            parsed = json.loads(c.text)
-                                            if isinstance(parsed, dict) and isinstance(parsed.get("base64_image"), str):
-                                                base64_data_url = parsed.get("base64_image")
-                                        except Exception:
-                                            pass
-                                result_str = result_str or ""
-                            else:
-                                result_str = str(result)
-                        except Exception:
-                            result_str = str(result)
+                        
+                        if getattr(result, "content", None):
+                            for c in result.content:
+                                if hasattr(c, "text") and c.text and not result_str:
+                                    # Prefer the first textual observation that is not a base64 blob
+                                    if "base64_image" in c.text or c.text.startswith("data:image"):
+                                        # skip setting result_str from this chunk
+                                        pass
+                                    else:
+                                        result_str = c.text
+                                # Some MCP tools pack JSON in text; try to pull base64_image
+                                if hasattr(c, "text") and c.text and ("base64_image" in c.text):
+                                    try:
+                                        parsed = json.loads(c.text)
+                                        if isinstance(parsed, dict) and isinstance(parsed.get("base64_image"), str):
+                                            base64_data_url = parsed.get("base64_image")
+                                    except Exception:
+                                        pass
+
 
                         # Log safe text preview only
                         try:

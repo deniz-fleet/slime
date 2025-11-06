@@ -132,11 +132,10 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                         # skip setting result_str from this chunk
                                         pass
                                     else:
-                                        result_str = c.text
-                            
-                                    preview = (result_str or "")[:512]
-                                    suffix = "…" if (result_str and len(result_str) > 512) else ""
-                                    _ppt(f"tool result text: {preview}{suffix}")
+                                        result_str = c.text                            
+                                        preview = (result_str or "")[:512]
+                                        suffix = "…" if (result_str and len(result_str) > 512) else ""
+                                        _ppt(f"tool result text: {preview}{suffix}")
                                     
                                 # Some MCP tools pack JSON in text; try to pull base64_image
                                 if hasattr(c, "text") and c.text and ("base64_image" in c.text):

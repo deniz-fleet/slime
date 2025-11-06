@@ -41,22 +41,12 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
     try:
         # Prepare final answer (transcript) for verifier
         final_answer: Optional[str] = meta.get("final_answer")
-        if not final_answer and isinstance(sample.response, str):
-            # Best-effort: if response holds JSON, try to extract; otherwise use as-is
-            try:
-                parsed = json.loads(sample.response)
-                if isinstance(parsed, dict) and isinstance(parsed.get("final_answer"), str):
-                    final_answer = parsed.get("final_answer")
-            except Exception:
-                # Treat raw response as transcript if it's not JSON
-                if sample.response.strip():
-                    final_answer = sample.response.strip()
-
         # Verify and extract a numeric score
         print(f"{final_answer=}")
         detailed = await task.verify_detailed_async(env, final_answer=final_answer)
         print(
             f"evaluating task {task_key} with env {env_key}",
+            f"final answer: {final_answer}",
             f"detailed verification response: {detailed}",
         )
 

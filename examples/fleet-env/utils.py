@@ -7,6 +7,126 @@ from typing import Any, Dict, List, Union, Optional
 from pydantic import BaseModel
 
 
+COMPUTER_TOOL_USAGE_GUIDE = """## Computer Control Tool Usage Guide
+
+### Screen Information
+
+- Resolution: 1366x768 pixels (scaled from 1920x1080)
+
+- Coordinate system: (0,0) is top-left, (1365,767) is bottom-right
+
+- All coordinates must be integers within valid ranges
+
+
+
+### Action Parameters
+
+
+
+1. **Mouse Actions** (require coordinate):
+
+   - `left_click`: Click at [x, y]
+
+   - `right_click`: Right-click at [x, y]  
+
+   - `double_click`: Double-click at [x, y]
+
+   - `triple_click`: Triple-click at [x, y]
+
+   - `middle_click`: Middle-click at [x, y]
+
+   - `mouse_move`: Move cursor to [x, y]
+
+
+
+2. **Drag Operations** (require both start_coordinate and coordinate):
+
+   - `left_click_drag`: Drag from start_coordinate to coordinate
+
+   
+
+3. **Keyboard Actions**:
+
+   - `type`: Enter text (text parameter required, no coordinate)
+
+   - `key`: Press special key like "Return", "Tab", "Escape" (text parameter)
+
+   - `hold_key`: Hold modifier key for duration seconds
+
+
+
+4. **Scrolling**:
+
+   - `scroll`: Requires scroll_direction ("up"/"down"/"left"/"right") and scroll_amount
+
+
+
+5. **Utility Actions**:
+
+   - `screenshot`: Take screenshot (no parameters needed)
+
+   - `wait`: Pause for duration seconds
+
+   - `cursor_position`: Get current cursor position
+
+
+
+### Common Mistakes to Avoid:
+
+❌ DO NOT use string labels for coordinates: ["search_bar", "end"]
+
+❌ DO NOT use negative coordinates: [-1, 48]  
+
+❌ DO NOT mix action types with wrong parameters
+
+❌ DO NOT use coordinate parameter with type/key actions
+
+✅ DO use integer coordinates: [683, 400]
+
+✅ DO take screenshots first to see the screen
+
+✅ DO verify coordinates are within bounds (x: 0-1365, y: 0-767)
+
+
+
+### Correct Examples:
+
+# Take screenshot first to see what's on screen
+
+{"action": "screenshot"}
+
+
+
+# Click on a button at specific location
+
+{"action": "left_click", "coordinate": [500, 300]}
+
+
+
+# Type text (no coordinate needed)
+
+{"action": "type", "text": "Hello World"}
+
+
+
+# Press Enter key
+
+{"action": "key", "text": "Return"}
+
+
+
+# Drag from one point to another
+
+{"action": "left_click_drag", "start_coordinate": [100, 100], "coordinate": [500, 500]}
+
+
+
+# Scroll down 5 steps
+
+{"action": "scroll", "scroll_direction": "down", "scroll_amount": 5}
+"""
+
+
 class TextContent(BaseModel):
     type: str = "text"
     text: str
@@ -78,13 +198,10 @@ def build_user_message_from_sample(sample: Any, tools: Optional[List[Any]] = Non
                     line += f" — {desc}"
                 lines.append(line)
 
-            # Add brief usage constraints for the common computer tool
-            if any(getattr(t, "name", "") == "computer" for t in tools):
-                lines.append(
-                    "Guidance: scroll requires scroll_direction (up/down/left/right); type requires non-empty text."
-                )
-
             contents.append(TextContent(text="\n".join(lines)))
+            # Append a fixed usage guide for the common computer tool
+            if any(getattr(t, "name", "") == "computer" for t in tools):
+                contents.append(TextContent(text=COMPUTER_TOOL_USAGE_GUIDE))
         except Exception:
             # best-effort; ignore tools dump errors
             pass

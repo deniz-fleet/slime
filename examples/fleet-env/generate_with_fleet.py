@@ -133,6 +133,11 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                         pass
                                     else:
                                         result_str = c.text
+                            
+                                    preview = (result_str or "")[:512]
+                                    suffix = "…" if (result_str and len(result_str) > 512) else ""
+                                    _ppt(f"tool result text: {preview}{suffix}")
+                                    
                                 # Some MCP tools pack JSON in text; try to pull base64_image
                                 if hasattr(c, "text") and c.text and ("base64_image" in c.text):
                                     try:
@@ -141,15 +146,6 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                             base64_data_url = parsed.get("base64_image")
                                     except Exception:
                                         pass
-
-
-                        # Log safe text preview only
-                        try:
-                            preview = (result_str or "")[:512]
-                            suffix = "…" if (result_str and len(result_str) > 512) else ""
-                            _ppt(f"tool result text: {preview}{suffix}")
-                        except Exception:
-                            pass
 
                         messages.append({
                             "role": "tool",

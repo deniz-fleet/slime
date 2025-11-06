@@ -19,7 +19,8 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
         raise ValueError("Missing task_key or env_key (--fleet-env); include in sample.metadata or args")
 
     # Fetch task and create env aligned to task config
-    task = await fleet.get_task(task_key)
+    task = fleet.get_task(task_key)
+    print(f"evaluating task {task_key} with env {env_key}")
     env = await task.make(region=None, image_type="mcp", ttl_seconds=1800)
 
     try:

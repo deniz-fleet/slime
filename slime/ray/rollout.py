@@ -541,12 +541,12 @@ def _log_rollout_data(rollout_id, args, samples, rollout_extra_metrics, rollout_
                     ext = ".jpg"
                 elif "png" in header:
                     ext = ".png"
-            else:
+                else:
                     ext = ".jpg"
-            out_dir = Path("/workspace/rollouts/images")
+                out_dir = Path("/workspace/rollouts/images")
                 out_dir.mkdir(parents=True, exist_ok=True)
-            filename = f"{task_key_dir}{ext}" if task_key_dir else f"rollout_{rollout_id}{ext}"
-            out_path = out_dir / filename
+                filename = f"{task_key_dir}{ext}" if task_key_dir else f"rollout_{rollout_id}{ext}"
+                out_path = out_dir / filename
                 out_path.write_bytes(raw)
                 log_dict["rollout/last_image_path"] = str(out_path)
             except Exception:

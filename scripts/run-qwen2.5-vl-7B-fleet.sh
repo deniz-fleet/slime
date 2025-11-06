@@ -75,7 +75,7 @@ SGLANG_ARGS=(
    --sglang-max-running-requests 128
    --sglang-disable-cuda-graph
    --sglang-max-prefill-tokens 128
-   --debug-rollout-only
+   ##--debug-rollout-only
    --sglang-tool-call-parser qwen25
    --sglang-allow-auto-truncate
 )

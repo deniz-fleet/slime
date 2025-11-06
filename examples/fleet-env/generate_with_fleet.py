@@ -76,7 +76,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "messages": window_messages,
                         "tools": tools_param,
                         "tool_choice": "required",
-                        "max_tokens": 256,
+                        "max_tokens": 512,
                     }
                     # model call.
                     mosresp = await post(chat_url, req)

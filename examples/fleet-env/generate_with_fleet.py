@@ -237,6 +237,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
             pass
     # Finalize sample
     _pp(f"finalizing sample with {len(tool_trace)} tool calls")
+    if sample.metadata["final_answer"] is None:
+        sample.metadata["final_answer"] = result_str
     sample.response = json.dumps({"steps": tool_trace}, ensure_ascii=False)
     sample.status = Sample.Status.COMPLETED
     sample.metadata.setdefault("tool_trace", tool_trace)

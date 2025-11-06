@@ -160,11 +160,14 @@ Wrong (coordinates with type/key/screenshot/wait):
 
 ### Completion
 
-- `done`: Only when ALL Strict Completion Gate conditions are satisfied.
+- You MUST finish by emitting a `done` tool call once the objective is achieved or no further beneficial actions remain.
+- `done` is allowed only when ALL Strict Completion Gate conditions are satisfied.
 - Never use `done` to report loading states or lack of content; use `wait` then `screenshot` until stable, then act.
-- Final Answer Requirement: when you call `done`, the `summary` MUST contain the direct, explicit answer to the user’s question (no meta statements like “identified” or “completed”). Include all requested fields in plain text.
-  - Example (Amazon reviews): provide exactly three lines, each with "Reviewer — Rating — Headline".
-  - Do not include tool logs or rationale in the summary; only the final answer.
+- Completion Summary Requirement: when you call `done`, the `summary` MUST contain:
+  - For question-answering tasks: the direct, explicit answer (no meta statements like “identified” or “completed”). Include all requested fields in plain text.
+  - For action/operation tasks (e.g., “place the order”, “send the email”): a clear confirmation that the action is complete, plus any visible identifiers shown on screen (e.g., confirmation number) if available.
+  - Do not include tool logs or rationale in the summary; only the final answer or completion confirmation.
+  - Never end a turn by only saying “task complete” in prose; you must emit a `done` tool call.
 
 ### Tool Call Output (Qwen 2.5 parser)
 
@@ -176,7 +179,7 @@ Wrong (coordinates with type/key/screenshot/wait):
 - Reason first, then act: write 1–2 concise sentences of rationale, then emit the tool call block. Avoid extra text after the block.
 - Use valid, concise JSON for `arguments`.
 - If multiple actions are needed, emit one call now; wait for the tool result next turn before emitting another.
-- To finish, use the same format with `{"name":"done","arguments":{"summary":"<FINAL ANSWER HERE>"}}`. The summary must directly answer the user.
+- To finish, you MUST use the same format with `{"name":"done","arguments":{"summary":"<FINAL ANSWER HERE>"}}`. The summary must directly answer the user OR explicitly confirm completion for action tasks (with any visible identifiers when present).
 
 ### Tool Call Grammar Enforcement (clarification)
 

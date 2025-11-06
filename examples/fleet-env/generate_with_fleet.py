@@ -35,7 +35,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     
 
     def _pp(msg: str):
-        print(f"[pid={os.getpid()}][task_key={sample.metadata.get("task_key", "unknown")}] {msg}")
+        task_key = (getattr(sample, "metadata", {}) or {}).get("task_key", "unknown")
+        print(f"[pid={os.getpid()}][task_key={task_key}] {msg}")
 
 
     # Create Fleet env and MCP session; list tools once
@@ -242,8 +243,6 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     sample.metadata.setdefault("env_key", env_key)
     if isinstance(final_answer, str) and final_answer:
         sample.metadata["final_answer"] = final_answer
-    
-    cntr += 1
 
     return sample
 

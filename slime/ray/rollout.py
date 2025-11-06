@@ -511,10 +511,15 @@ def _log_rollout_data(rollout_id, args, samples, rollout_extra_metrics, rollout_
     try:
         turn_counts = []
         last_image_data_url = None
+        task_key_dir = None
         for sample in samples:
             metadata = getattr(sample, "metadata", {}) or {}
             tool_trace = metadata.get("tool_trace") or []
             turn_counts.append(len(tool_trace))
+            if task_key_dir is None:
+                tk = metadata.get("task_key")
+                if isinstance(tk, (str, int)):
+                    task_key_dir = str(tk)
             # capture last screenshot data URL from the trace if present
             for entry in tool_trace:
                 url = (entry or {}).get("image_url")
@@ -536,11 +541,12 @@ def _log_rollout_data(rollout_id, args, samples, rollout_extra_metrics, rollout_
                     ext = ".jpg"
                 elif "png" in header:
                     ext = ".png"
-                else:
+            else:
                     ext = ".jpg"
-                out_dir = Path("/workspace/rollouts/images")
+            out_dir = Path("/workspace/rollouts/images")
                 out_dir.mkdir(parents=True, exist_ok=True)
-                out_path = out_dir / f"rollout_{rollout_id}{ext}"
+            filename = f"{task_key_dir}{ext}" if task_key_dir else f"rollout_{rollout_id}{ext}"
+            out_path = out_dir / filename
                 out_path.write_bytes(raw)
                 log_dict["rollout/last_image_path"] = str(out_path)
             except Exception:

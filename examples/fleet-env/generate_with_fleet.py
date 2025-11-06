@@ -77,6 +77,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "tools": tools_param,
                         "tool_choice": "auto",
                         "max_tokens": 512,
+                        "stop": ["</tool_call>"],
                     }
                     # model call.
                     mosresp = await post(chat_url, req)
@@ -85,6 +86,36 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []
                     _ppt(f"{tool_calls=}")
+
+                    # Fallback: synthesize a tool call if model emitted raw JSON in content
+                    if not tool_calls:
+                        content_text = msg.get("content")
+                        if isinstance(content_text, str):
+                            try:
+                                raw = json.loads(content_text)
+                                if isinstance(raw, dict):
+                                    # Qwen often outputs direct action JSON. Map to 'computer' tool when available.
+                                    has_computer = any(getattr(t, "name", "") == "computer" for t in tools)
+                                    if has_computer and ("action" in raw or "scroll_direction" in raw or "text" in raw):
+                                        tool_calls = [{
+                                            "id": f"fallback_{turn}",
+                                            "type": "function",
+                                            "function": {"name": "computer", "arguments": json.dumps(raw)},
+                                        }]
+                                    elif "name" in raw and "arguments" in raw:
+                                        tool_calls = [{
+                                            "id": f"fallback_{turn}",
+                                            "type": "function",
+                                            "function": {"name": raw.get("name"), "arguments": json.dumps(raw.get("arguments", {}))},
+                                        }]
+                                    elif "summary" in raw:
+                                        tool_calls = [{
+                                            "id": f"fallback_{turn}",
+                                            "type": "function",
+                                            "function": {"name": "done", "arguments": json.dumps({"summary": raw.get("summary")})},
+                                        }]
+                            except Exception:
+                                pass
 
                     # Append assistant message with tool_calls to maintain context
                     messages.append({"role": "assistant", "content": (msg.get("content") or ""), "tool_calls": tool_calls})
@@ -121,8 +152,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             break
                         
                         elif name == 'wait':
-                            _ppt(f"waiting for {duration} seconds")
                             duration = parsed_args.get("duration", 2)
+                            _ppt(f"waiting for {duration} seconds")
                             await asyncio.sleep(duration)
                             continue
 

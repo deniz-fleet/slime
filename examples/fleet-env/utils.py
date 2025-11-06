@@ -119,10 +119,8 @@ Wrong (coordinates with type/key/screenshot/wait):
 
 - `done`: Only when ALL Strict Completion Gate conditions are satisfied.
 - Never use `done` to report loading states or lack of content; use `wait` then `screenshot` until stable, then act.
-"""
 
-
-TOOL_CALL_OUTPUT_GUIDE = """### Tool Call Output (Qwen 2.5 parser)
+### Tool Call Output (Qwen 2.5 parser)
 
 - Emit exactly ONE tool call per assistant turn.
 - Wrap it EXACTLY as:
@@ -134,6 +132,9 @@ TOOL_CALL_OUTPUT_GUIDE = """### Tool Call Output (Qwen 2.5 parser)
 - If multiple actions are needed, emit one call now; wait for the tool result next turn before emitting another.
 - To finish, use the same format with `{"name":"done","arguments":{"summary":"..."}}`.
 """
+
+
+ 
 
 
 class TextContent(BaseModel):
@@ -327,8 +328,7 @@ def build_user_message_from_sample(sample: Any, tools: Optional[List[Any]] = Non
             # Append a fixed usage guide for the common computer tool
             if any(getattr(t, "name", "") == "computer" for t in tools):
                 contents.append(TextContent(text=COMPUTER_TOOL_USAGE_GUIDE))
-            # Always append explicit instructions to emit a single tool call in Qwen 2.5 tag format
-            contents.append(TextContent(text=TOOL_CALL_OUTPUT_GUIDE))
+            
         except Exception:
             # best-effort; ignore tools dump errors
             pass
@@ -378,6 +378,7 @@ class ToolFunction(BaseModel):
     name: str
     description: str = ""
     parameters: Dict[str, Any] = {}
+    strict: bool = True
 
 
 class ToolSpec(BaseModel):

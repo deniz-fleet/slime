@@ -528,11 +528,20 @@ def _log_rollout_data(rollout_id, args, samples, rollout_extra_metrics, rollout_
         if isinstance(last_image_data_url, str) and last_image_data_url.startswith("data:"):
             try:
                 header, b64 = last_image_data_url.split(",", 1)
-                ext = ".png" if "png" in header else ".jpg"
+                # decode and sniff format to choose correct extension
+                raw = base64.b64decode(b64)
+                if raw.startswith(b"\x89PNG"):
+                    ext = ".png"
+                elif raw.startswith(b"\xff\xd8\xff"):
+                    ext = ".jpg"
+                elif "png" in header:
+                    ext = ".png"
+                else:
+                    ext = ".jpg"
                 out_dir = Path("/workspace/rollouts/images")
                 out_dir.mkdir(parents=True, exist_ok=True)
                 out_path = out_dir / f"rollout_{rollout_id}{ext}"
-                out_path.write_bytes(base64.b64decode(b64))
+                out_path.write_bytes(raw)
                 log_dict["rollout/last_image_path"] = str(out_path)
             except Exception:
                 # ignore image save errors

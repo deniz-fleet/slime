@@ -174,10 +174,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                         {"type": "text", "text": "Observation screenshot"},
                                     ],
                                 })
-                                trace_entry["image_inline"] = True
-                                _ppt("tool screenshot: inline data URL attached")
-                            except Exception:
-                                pass
+                                trace_entry["image_url"] = safe_image_url
 
                         tool_trace.append(trace_entry)
 

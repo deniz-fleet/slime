@@ -359,7 +359,7 @@ async def generate_rollout_async(
             if do_print:
                 sample = group[0][0] if isinstance(group[0], list) else group[0]
                 print(
-                    f"First rollout sample: {[str(sample.prompt) + sample.response]}, label: {sample.label}, reward: {sample.reward}",
+                    f"First rollout sample: {str(sample.prompt) + sample.response}, label: {sample.label}, reward: {sample.reward}",
                     flush=True,
                 )
                 do_print = False

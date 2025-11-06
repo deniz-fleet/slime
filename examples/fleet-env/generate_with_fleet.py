@@ -126,26 +126,18 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             "result_text": result_str,
                         }
 
-                        # If we have a screenshot, save under a shared path and add as user multimodal
+                        # If we have a screenshot, attach inline (data URL) to avoid FS coupling
                         if isinstance(base64_data_url, str) and base64_data_url.startswith("data:"):
                             try:
-                                rollout_id = getattr(sample, "index", 0)
-                                out_path = save_data_url_to_image_path(
-                                    data_url=base64_data_url,
-                                    env_key=str(env_key),
-                                    rollout_id=int(rollout_id),
-                                    turn=int(turn),
-                                    root_dir=getattr(args, "screenshot_root", "/sgl-workspace/images"),
-                                )
                                 messages.append({
                                     "role": "user",
                                     "content": [
-                                        {"type": "image_url", "image_url": {"url": f"file://{out_path}"}},
+                                        {"type": "image_url", "image_url": {"url": base64_data_url}},
                                         {"type": "text", "text": "Observation screenshot"},
                                     ],
                                 })
-                                trace_entry["image_file"] = f"file://{out_path}"
-                                print(f"tool screenshot: file://{out_path}")
+                                trace_entry["image_inline"] = True
+                                print("tool screenshot: inline data URL attached")
                             except Exception:
                                 pass
 

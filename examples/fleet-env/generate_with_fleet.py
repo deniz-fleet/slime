@@ -120,6 +120,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             break
                         
                         elif name == 'wait':
+                            _ppt(f"waiting for {duration} seconds")
                             duration = parsed_args.get("duration", 2)
                             await asyncio.sleep(duration)
                             continue

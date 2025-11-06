@@ -65,8 +65,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     }
                     # model call.
                     mosresp = await post(chat_url, req)
-                    _ppt(f"{resp=}")
-                    choice = (resp.get("choices") or [{}])[0]
+                    _ppt(f"{mosresp=}")
+                    choice = (mosresp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []
 

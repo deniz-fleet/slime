@@ -127,7 +127,7 @@ Wrong (coordinates with type/key/screenshot/wait):
 <tool_call>
 {"name":"TOOL_NAME","arguments":{...}}
 </tool_call>
-- Do NOT output any other text before or after the block (no reasoning, no prose).
+- Reason first, then act: write 1–2 concise sentences of rationale, then emit the tool call block. Avoid extra text after the block.
 - Use valid, concise JSON for `arguments`.
 - If multiple actions are needed, emit one call now; wait for the tool result next turn before emitting another.
 - To finish, use the same format with `{"name":"done","arguments":{"summary":"..."}}`.
@@ -150,6 +150,12 @@ Wrong (placeholder tool name — ignored or rejected):
 Correct (tag + real tool name + valid arguments):
 <tool_call>
 {"name":"computer","arguments":{"action":"left_click","coordinate":[500,300]}}
+</tool_call>
+
+Reason-then-Act example (correct sequencing):
+I see the Amazon home page with the search bar focused. I will type the query to begin the search.
+<tool_call>
+{"name":"computer","arguments":{"action":"type","text":"MOTU M2 Audio Interface - Portable and Powerful"}}
 </tool_call>
 """
 

@@ -79,7 +79,6 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "tools": tools_param,
                         "tool_choice": "auto",
                         "max_tokens": 512,
-                        "stop": ["</tool_call>"],
                     }
                     # model call.
                     mosresp = await post(chat_url, req)

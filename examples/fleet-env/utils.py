@@ -2,7 +2,7 @@ import base64
 from pathlib import Path
 import json
 import mimetypes
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 from pydantic import BaseModel
 
@@ -34,7 +34,7 @@ def img_path_to_data_url(path: str) -> str:
     return f"data:{mime};base64,{b64}"
 
 
-def build_user_message_from_sample(sample: Any) -> Dict[str, Any]:
+def build_user_message_from_sample(sample: Any, tools: Optional[List[Any]] = None) -> Dict[str, Any]:
     contents: List[Union[TextContent, ImageUrlContent]] = []
     if isinstance(sample.prompt, str):
         contents.append(TextContent(text=sample.prompt))
@@ -53,6 +53,41 @@ def build_user_message_from_sample(sample: Any) -> Dict[str, Any]:
                         continue
         if text_parts:
             contents.insert(0, TextContent(text="".join(text_parts)))
+
+    # Optionally append a compact tools usage block as text
+    if tools:
+        try:
+            lines: List[str] = []
+            lines.append("Tools available:")
+            for t in tools:
+                name = getattr(t, "name", None) or getattr(t, "id", "tool")
+                desc = (getattr(t, "description", None) or "").strip()
+                schema = getattr(t, "inputSchema", {}) or {}
+                req = []
+                try:
+                    req = list((schema.get("required") or []))
+                except Exception:
+                    req = []
+                props = []
+                try:
+                    props = list(((schema.get("properties") or {}).keys()))
+                except Exception:
+                    props = []
+                line = f"- {name}: required={req} props={props}"
+                if desc:
+                    line += f" — {desc}"
+                lines.append(line)
+
+            # Add brief usage constraints for the common computer tool
+            if any(getattr(t, "name", "") == "computer" for t in tools):
+                lines.append(
+                    "Guidance: scroll requires scroll_direction (up/down/left/right); type requires non-empty text."
+                )
+
+            contents.append(TextContent(text="\n".join(lines)))
+        except Exception:
+            # best-effort; ignore tools dump errors
+            pass
     # If no images, flatten to string content for router-safe payloads
     has_image = any(getattr(c, "type", "") == "image_url" for c in contents)
     if not has_image:

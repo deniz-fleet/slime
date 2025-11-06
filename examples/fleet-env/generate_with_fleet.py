@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from typing import Any, Dict, List
 
 import fleet
@@ -23,16 +24,18 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     - Supports multimodal via image_url content items for Qwen-VL.
     """
     chat_url = f"http://{args.sglang_router_ip}:{args.sglang_router_port}/v1/chat/completions"
-    user_message = build_user_message_from_sample(sample)
-    print(f"{args.sglang_router_ip=}")
-    print(f"{args.sglang_router_port=}")
+    
+
+    def _pp(msg: str):
+        print(f"[pid={os.getpid()}] {msg}")
+
 
     # Create Fleet env and MCP session; list tools once
     env_key = getattr(args, "fleet_env", None) or getattr(args, "fleet_env_key", None)
     if not env_key:
         raise ValueError("--fleet-env is required for Fleet tool loop")
 
-    print(f"making fleet env call..")
+    _pp("making fleet env call..")
     env = await fleet.env.make_async(env_key=env_key, image_type="mcp", ttl_seconds=3600)
     mcp_url = f"{env.urls.root}api/v1/mcp"
 
@@ -41,8 +44,9 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
             async with ClientSession(read_stream=streams[0], write_stream=streams[1]) as session:
                 await session.initialize()
                 tools = await list_mcp_tools(session)
-                print(f"{tools=}")
+                _pp(f"{tools=}")
                 tools_param = build_tools_param(tools)
+                user_message = build_user_message_from_sample(sample, tools)
                 #print(f"{tools_param=}")
 
                 messages: List[Dict[str, Any]] = [user_message]
@@ -58,8 +62,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "tool_choice": "required",
                     }
                     # model call.
-                    resp = await post(chat_url, req)
-                    print(f"{resp=}")
+                    mosresp = await post(chat_url, req)
+                    _pp(f"{resp=}")
                     choice = (resp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []
@@ -79,7 +83,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             parsed_args = json.loads(arguments) if isinstance(arguments, str) else arguments
                         except Exception:
                             parsed_args = {}
-                        print(f"calling tool {name} with args {parsed_args}")
+                        _pp(f"calling tool {name} with args {parsed_args}")
                         result = await session.call_tool(name, parsed_args)
                         # Avoid printing raw/binary blobs
                         # Extract textual observation and optional screenshot
@@ -108,7 +112,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         try:
                             preview = (result_str or "")[:512]
                             suffix = "…" if (result_str and len(result_str) > 512) else ""
-                            print(f"tool result text: {preview}{suffix}")
+                            _pp(f"tool result text: {preview}{suffix}")
                         except Exception:
                             pass
 
@@ -136,7 +140,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                     ],
                                 })
                                 trace_entry["image_inline"] = True
-                                print("tool screenshot: inline data URL attached")
+                                _pp("tool screenshot: inline data URL attached")
                             except Exception:
                                 pass
 
@@ -146,7 +150,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
             await env.close()
         except Exception:
             pass
-    print(f"{tool_trace=}")
+    _pp(f"{tool_trace=}")
     # Finalize sample
     sample.response = json.dumps({"steps": tool_trace}, ensure_ascii=False)
     sample.status = Sample.Status.COMPLETED

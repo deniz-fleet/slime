@@ -120,7 +120,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                                 base64_data_url = parsed.get("base64_image")
                                         except Exception:
                                             pass
-                                result_str = result_str or json.dumps([c.model_dump() for c in result.content])
+                                result_str = result_str or ""
                             else:
                                 result_str = str(result)
                         except Exception:

@@ -11,32 +11,30 @@ from pydantic import BaseModel
 
 COMPUTER_TOOL_USAGE_GUIDE = """## Computer Control Tool Usage Guide
 
-### Critical Wait Rule
+### Critical Wait Rule (hard stop)
 
-- If the screen is black/blank or shows a spinner/progress, do NOT call 'done'.
-- Perform {"action": "wait", "duration": 2} then {"action": "screenshot"} and reassess.
+- If the screen is black/blank or shows a spinner/progress, do NOT call `done`.
+- First do {"action": "wait", "duration": 2} then {"action": "screenshot"} and reassess.
+- If still loading or black after two cycles, repeat once more with {"duration": 5}.
+- You must not call `done` for any "still loading/black screen" reason.
 
 ### Screen Information
 
-- Resolution: 768x768 pixels
-
-- Coordinate system: (0,0) is top-left, (767,767) is bottom-right
-
+- Resolution: 1366x768 pixels
+- Coordinate system: (0,0) is top-left, (1365,767) is bottom-right
 - All coordinates must be integers within valid ranges
-
 
 ### First-Turn Protocol (hard rule)
 
 1) Always start with {"action": "screenshot"}.
-2) If anything is still loading (spinner, progress, or blank areas), do NOT call "done". Instead:
+2) If anything is still loading (spinner, progress, or blank areas), do NOT call `done`. Instead:
    - {"action": "wait", "duration": 2}, then {"action": "screenshot"} and reassess.
 3) Only after the page is stable, perform the next action (click/type/scroll/drag).
-4) Never call "done" on the first turn. Call "done" only after you have executed at least one valid non-screenshot action that advances the task and the goal is achieved.
-
+4) Never call `done` on the first turn. `done` requires at least one valid non-screenshot action that advances the task and a stable follow-up screenshot.
 
 ### Action Parameters (strict)
 
-- Mouse actions (require coordinate [x, y], integers 0–767):
+- Mouse actions (require coordinate [x, y], x in 0–1365 and y in 0–767):
   - `left_click`, `right_click`, `double_click`, `triple_click`, `middle_click`, `mouse_move`
   - Required: "coordinate": [x, y]
   - Forbidden: "start_coordinate", "text", "duration", "scroll_direction", "scroll_amount"
@@ -63,14 +61,25 @@ COMPUTER_TOOL_USAGE_GUIDE = """## Computer Control Tool Usage Guide
   - `wait`: Required "duration" (seconds). No coordinates.
   - `cursor_position`: No parameters.
 
-
 ### Safety Checks (before every call)
 
-- Coordinates within bounds: x in [0, 767], y in [0, 767]
+- Coordinates within bounds: x in [0, 1365], y in [0, 767]
 - Do not pass empty lists for coordinates.
 - Do not include parameters that the action does not accept.
 - For drags, both "start_coordinate" and "coordinate" must be present.
 
+### Strict Completion Gate (must satisfy ALL)
+
+1) You executed at least one non-screenshot action (click/type/scroll/drag/key).
+2) You observed a subsequent screenshot that is not black and not a loading spinner.
+3) The stated task objective is achieved, or there is a clear terminal state with no further beneficial actions.
+
+### Forbidden reasons to call `done` (these are always incorrect)
+
+- "The screen is black/blank" → Wait + Screenshot again instead.
+- "There is a spinner/progress/it is still loading" → Wait + Screenshot again.
+- "The search/navigation has not been performed yet" → Perform the action, do not `done`.
+- "No visible elements to interact with yet" → Wait + Screenshot until visible, then act.
 
 ### Wrong vs Correct
 
@@ -84,6 +93,11 @@ Wrong (missing start_coordinate on drag):
 Correct:
 {"action":"left_click_drag","start_coordinate":[100,100],"coordinate":[500,300]}  ✅
 
+Wrong (`done` while black screen/spinner):
+{"action":"done","summary":"The screen is black / still loading"}  ❌
+Correct (staged waiting and retry):
+{"action":"wait","duration":2} → {"action":"screenshot"}  ✅ (repeat if needed)
+
 Wrong (adding params to screenshot):
 {"action":"screenshot","duration":3}  ❌
 Correct:
@@ -91,7 +105,6 @@ Correct:
 
 Wrong (coordinates with type/key/screenshot/wait):
 {"action":"type","text":"hello","coordinate":[100,100]}  ❌
-
 
 ### Minimal Flow Example
 
@@ -102,11 +115,10 @@ Wrong (coordinates with type/key/screenshot/wait):
 {"action":"type","text":"hello world"}
 {"action":"key","text":"Return"}
 
-
 ### Completion
 
-- `done`: Only when the task objective is met and no further actions are needed.
-- Never use `done` to indicate a page is loading; use `wait` then `screenshot` instead.
+- `done`: Only when ALL Strict Completion Gate conditions are satisfied.
+- Never use `done` to report loading states or lack of content; use `wait` then `screenshot` until stable, then act.
 """
 
 

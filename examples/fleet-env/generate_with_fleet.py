@@ -41,7 +41,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
             async with ClientSession(read_stream=streams[0], write_stream=streams[1]) as session:
                 await session.initialize()
                 tools = await list_mcp_tools(session)
-                #print(f"{tools=}")
+                print(f"{tools=}")
                 tools_param = build_tools_param(tools)
                 #print(f"{tools_param=}")
 
@@ -57,7 +57,6 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "tools": tools_param,
                         "tool_choice": "required",
                     }
-                    print(f"{req=}")
                     # model call.
                     resp = await post(chat_url, req)
                     print(f"{resp=}")

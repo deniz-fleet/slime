@@ -380,7 +380,7 @@ async def generate_rollout_async(
     pbar.close()
     sample = data[-1][0][0] if isinstance(data[-1][0], list) else data[-1][0]
     print(
-        f"Finish rollout: {[str(sample.prompt) + sample.response]}, label: {sample.label}, reward: {sample.reward}",
+        f"Finish rollout: {[str(sample.prompt)}, label: {sample.label}, reward: {sample.reward}",
         flush=True,
     )
 

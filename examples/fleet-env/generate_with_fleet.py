@@ -65,6 +65,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                 # Support both max_tool_turns and max_turns for configuration
                 max_turns = 20
                 tool_trace: List[Dict[str, Any]] = []
+                final_answer: str = ""
 
                 finished = False
                 done_summary: str = ""
@@ -145,6 +146,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         # Intercept synthetic 'done' tool to finish the loop gracefully.
                         if name == "done":
                             done_summary = str(parsed_args.get("summary", "")).strip()
+                            final_answer = done_summary
                             messages.append({
                                 "role": "tool",
                                 "tool_call_id": tc.get("id"),
@@ -238,6 +240,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     sample.status = Sample.Status.COMPLETED
     sample.metadata.setdefault("tool_trace", tool_trace)
     sample.metadata.setdefault("env_key", env_key)
+    if isinstance(final_answer, str) and final_answer:
+        sample.metadata["final_answer"] = final_answer
 
     return sample
 

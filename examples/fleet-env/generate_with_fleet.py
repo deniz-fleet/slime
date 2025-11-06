@@ -85,9 +85,10 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     choice = (mosresp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []
-                    _ppt(f"{tool_calls=}")
+                    
 
                     # Fallback: synthesize a tool call if model emitted raw JSON in content
+                    fallback = False
                     if not tool_calls:
                         content_text = msg.get("content")
                         if isinstance(content_text, str):
@@ -102,6 +103,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                             "type": "function",
                                             "function": {"name": "computer", "arguments": json.dumps(raw)},
                                         }]
+                                        
                                     elif "name" in raw and "arguments" in raw:
                                         tool_calls = [{
                                             "id": f"fallback_{turn}",
@@ -114,8 +116,13 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                             "type": "function",
                                             "function": {"name": "done", "arguments": json.dumps({"summary": raw.get("summary")})},
                                         }]
+                                    if len(tool_calls) > 0:
+                                        fallback = True
+                                    
                             except Exception:
                                 pass
+
+                    _ppt(f"{fallback=} {tool_calls=}")
 
                     # Append assistant message with tool_calls to maintain context
                     messages.append({"role": "assistant", "content": (msg.get("content") or ""), "tool_calls": tool_calls})

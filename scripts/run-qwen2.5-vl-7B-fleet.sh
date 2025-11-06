@@ -76,6 +76,7 @@ SGLANG_ARGS=(
    --sglang-max-prefill-tokens 128
    --debug-rollout-only
    --sglang-tool-call-parser qwen25
+   --grammar-backend xgrammar
    --sglang-allow-auto-truncate
 )
 OPTIMIZER_ARGS=(
@@ -99,7 +100,8 @@ RUNTIME_ENV_JSON='{
   "env_vars": {
     "PYTHONPATH": "/root/Megatron-LM/",
     "CUDA_DEVICE_MAX_CONNECTIONS": "32",
-    "NCCL_NVLS_ENABLE": "'"${HAS_NVLINK}"'"
+    "NCCL_NVLS_ENABLE": "'"${HAS_NVLINK}"'",
+    "SGLANG_TOOL_STRICT_LEVEL": "1"
   }
 }'
 

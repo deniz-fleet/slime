@@ -122,6 +122,20 @@ Wrong (coordinates with type/key/screenshot/wait):
 """
 
 
+TOOL_CALL_OUTPUT_GUIDE = """### Tool Call Output (Qwen 2.5 parser)
+
+- Emit exactly ONE tool call per assistant turn.
+- Wrap it EXACTLY as:
+<tool_call>
+{"name":"TOOL_NAME","arguments":{...}}
+</tool_call>
+- Do NOT output any other text before or after the block (no reasoning, no prose).
+- Use valid, concise JSON for `arguments`.
+- If multiple actions are needed, emit one call now; wait for the tool result next turn before emitting another.
+- To finish, use the same format with `{"name":"done","arguments":{"summary":"..."}}`.
+"""
+
+
 class TextContent(BaseModel):
     type: str = "text"
     text: str
@@ -313,6 +327,8 @@ def build_user_message_from_sample(sample: Any, tools: Optional[List[Any]] = Non
             # Append a fixed usage guide for the common computer tool
             if any(getattr(t, "name", "") == "computer" for t in tools):
                 contents.append(TextContent(text=COMPUTER_TOOL_USAGE_GUIDE))
+            # Always append explicit instructions to emit a single tool call in Qwen 2.5 tag format
+            contents.append(TextContent(text=TOOL_CALL_OUTPUT_GUIDE))
         except Exception:
             # best-effort; ignore tools dump errors
             pass

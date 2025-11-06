@@ -75,7 +75,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "model":"/root/Qwen2.5-VL-7B-Instruct",
                         "messages": window_messages,
                         "tools": tools_param,
-                        "tool_choice": "required",
+                        "tool_choice": "auto",
                         "max_tokens": 512,
                     }
                     # model call.
@@ -84,6 +84,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     choice = (mosresp.get("choices") or [{}])[0]
                     msg = choice.get("message") or {}
                     tool_calls = msg.get("tool_calls") or []
+                    _ppt(f"{tool_calls=}")
 
                     # Append assistant message with tool_calls to maintain context
                     messages.append({"role": "assistant", "content": (msg.get("content") or ""), "tool_calls": tool_calls})

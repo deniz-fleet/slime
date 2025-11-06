@@ -169,7 +169,7 @@ Wrong (coordinates with type/key/screenshot/wait):
   - Do not include tool logs or rationale in the summary; only the final answer or completion confirmation.
   - Never end a turn by only saying “task complete” in prose; you must emit a `done` tool call.
 
-### Tool Call Output (Qwen 2.5 parser)
+### Tool Call Output
 
 - Emit exactly ONE tool call per assistant turn.
 - Wrap it EXACTLY as below. This is an example of a tool call:

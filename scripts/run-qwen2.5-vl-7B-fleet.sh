@@ -42,7 +42,7 @@ ROLLOUT_ARGS=(
   --n-samples-per-prompt 2
   --global-batch-size 8
   --num-rollout 50
-  --rollout-max-response-len 131072
+  --rollout-max-response-len 16384
 )
 DEBUG_ARGS=(
    --save-debug-rollout-data /workspace/rollouts/{wandb_run_id}/

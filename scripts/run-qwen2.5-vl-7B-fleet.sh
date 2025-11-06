@@ -63,7 +63,6 @@ PERF_ARGS=(
   --context-parallel-size 1
   --expert-model-parallel-size 1
   --expert-tensor-parallel-size 1
-
   --recompute-granularity full
   --recompute-method uniform
   --recompute-num-layers 4
@@ -75,7 +74,7 @@ SGLANG_ARGS=(
    --sglang-max-running-requests 128
    --sglang-disable-cuda-graph
    --sglang-max-prefill-tokens 128
-   ##--debug-rollout-only
+   --debug-rollout-only
    --sglang-tool-call-parser qwen25
    --sglang-allow-auto-truncate
 )
@@ -108,7 +107,7 @@ ray job submit --address="http://127.0.0.1:8265" \
   --runtime-env-json="${RUNTIME_ENV_JSON}" \
   -- python3 train.py \
   --actor-num-nodes 1 \
-  --actor-num-gpus-per-node 8 \
+  --actor-num-gpus-per-node 1 \
   --colocate \
   --use-slime-router \
   ${DEBUG_ARGS[@]} \

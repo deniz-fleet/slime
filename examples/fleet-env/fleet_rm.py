@@ -27,12 +27,12 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
     data_key: Optional[str] = getattr(task, "data_key", None)
     env_variables: Optional[dict] = getattr(task, "env_variables", None)
 
-    if not env_key_to_use:
+    if not env_key:
         raise ValueError("Unable to determine env_key from task or args")
 
     print(f"evaluating task {task_key} with env {env_key}")
     env = await fleet.env.make_async(
-        env_key=env_key_to_use,
+        env_key=env_key,
         data_key=data_key,
         env_variables=env_variables,
         ttl_seconds=10800,
@@ -40,18 +40,12 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
 
     try:
         # Verify and extract a numeric score
-        detailed = await task.verify_detailed_async(env, final_answer=sample.response or None)
-        score = getattr(detailed, "score", None)
-        if isinstance(score, (int, float)):
-            return float(score)
+        detailed = await task.verify_detailed_async(env)
+        print(f"detailed: {detailed}")
 
-        # Fallbacks in case the response model differs
-        is_success = getattr(detailed, "is_success", None)
-        if isinstance(is_success, bool):
-            return 1.0 if is_success else 0.0
+        return 1
 
-        # Last resort: treat truthiness as success
-        return 1.0 if detailed else 0.0
+
     finally:
         try:
             await env.close()

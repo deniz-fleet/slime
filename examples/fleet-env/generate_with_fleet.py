@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import re
 from typing import Any, Dict, List
 
 import fleet
@@ -9,7 +10,13 @@ from mcp.client.streamable_http import streamablehttp_client
 
 from slime.utils.http_utils import post
 from slime.utils.types import Sample
-from .utils import build_user_message_from_sample, list_mcp_tools, build_tools_param, save_data_url_to_image_path
+from .utils import (
+    build_user_message_from_sample,
+    list_mcp_tools,
+    build_tools_param,
+    save_data_url_to_image_path,
+    normalize_image_reference_to_image_url,
+)
 
 async def _list_mcp_tools(session: ClientSession):
     listed = await session.list_tools()
@@ -62,6 +69,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         "messages": messages,
                         "tools": tools_param,
                         "tool_choice": "required",
+                        "max_tokens": 128,
                     }
                     # model call.
                     mosresp = await post(chat_url, req)
@@ -71,7 +79,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                     tool_calls = msg.get("tool_calls") or []
 
                     # Append assistant message with tool_calls to maintain context
-                    messages.append({"role": "assistant", "content": msg.get("content"), "tool_calls": tool_calls})
+                    messages.append({"role": "assistant", "content": (msg.get("content") or ""), "tool_calls": tool_calls})
 
                     if not tool_calls:
                         break
@@ -95,7 +103,12 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             if getattr(result, "content", None):
                                 for c in result.content:
                                     if hasattr(c, "text") and c.text and not result_str:
-                                        result_str = c.text
+                                        # Prefer the first textual observation that is not a base64 blob
+                                        if "base64_image" in c.text or c.text.startswith("data:image"):
+                                            # skip setting result_str from this chunk
+                                            pass
+                                        else:
+                                            result_str = c.text
                                     # Some MCP tools pack JSON in text; try to pull base64_image
                                     if hasattr(c, "text") and c.text and ("base64_image" in c.text):
                                         try:
@@ -132,12 +145,17 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         }
 
                         # If we have a screenshot, attach inline (data URL) to avoid FS coupling
-                        if isinstance(base64_data_url, str) and base64_data_url.startswith("data:"):
+                        # Attach screenshot image via image_url; normalize if needed
+                        safe_image_url = None
+                        if isinstance(base64_data_url, str):
+                            safe_image_url = normalize_image_reference_to_image_url(base64_data_url)
+
+                        if isinstance(safe_image_url, str):
                             try:
                                 messages.append({
                                     "role": "user",
                                     "content": [
-                                        {"type": "image_url", "image_url": {"url": base64_data_url}},
+                                        {"type": "image_url", "image_url": {"url": safe_image_url}},
                                         {"type": "text", "text": "Observation screenshot"},
                                     ],
                                 })

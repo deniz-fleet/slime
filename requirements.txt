@@ -9,3 +9,6 @@ ray[default]
 tensorboard
 transformers
 wandb
+anthropic
+fleet-python
+

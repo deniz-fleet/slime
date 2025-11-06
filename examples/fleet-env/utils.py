@@ -2,6 +2,8 @@ import base64
 from pathlib import Path
 import json
 import mimetypes
+import os
+import re
 from typing import Any, Dict, List, Union, Optional
 
 from pydantic import BaseModel
@@ -152,6 +154,51 @@ def img_path_to_data_url(path: str) -> str:
     with open(path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode("utf-8")
     return f"data:{mime};base64,{b64}"
+
+
+def normalize_image_reference_to_image_url(image_ref: str) -> Optional[str]:
+    """Normalize various image references into an OpenAI-style image_url.url string.
+
+    Accepts:
+    - data URLs (returned as-is)
+    - http/https URLs (returned as-is)
+    - file:// URLs (converted to data URL if file exists)
+    - absolute local paths (converted to data URL if file exists)
+    - raw base64 strings (wrapped as data:image/jpeg;base64,...)
+    Returns None if the input cannot be normalized.
+    """
+    if not isinstance(image_ref, str):
+        return None
+    ref = image_ref.strip()
+    if not ref:
+        return None
+    # Already a data URL
+    if ref.startswith("data:"):
+        return ref
+    # HTTP(S)
+    if ref.startswith("http://") or ref.startswith("https://"):
+        return ref
+    # file:// path
+    if ref.startswith("file://"):
+        file_path = ref[7:]
+        try:
+            if os.path.exists(file_path):
+                return img_path_to_data_url(file_path)
+        except Exception:
+            return None
+        return None
+    # Absolute local path
+    if ref.startswith("/") and os.path.exists(ref):
+        try:
+            return img_path_to_data_url(ref)
+        except Exception:
+            return None
+    # Heuristic: raw base64 (no data: or http)
+    # Try a fast regex check to avoid heavy decoding for arbitrary text
+    if re.fullmatch(r"[A-Za-z0-9+/=\s]+", ref[:256] or ""):
+        # Best-effort wrap; do not validate entire payload for speed
+        return f"data:image/jpeg;base64,{ref}"
+    return None
 
 
 def build_user_message_from_sample(sample: Any, tools: Optional[List[Any]] = None) -> Dict[str, Any]:

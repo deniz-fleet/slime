@@ -118,6 +118,11 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             })
                             finished = True
                             break
+                        
+                        elif name == 'wait':
+                            duration = parsed_args.get("duration", 2)
+                            await asyncio.sleep(duration)
+                            continue
 
                         result = await session.call_tool(name, parsed_args)
                         # Avoid printing raw/binary blobs

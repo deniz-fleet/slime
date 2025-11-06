@@ -11,6 +11,11 @@ from pydantic import BaseModel
 
 COMPUTER_TOOL_USAGE_GUIDE = """## Computer Control Tool Usage Guide
 
+### Critical Wait Rule
+
+- If the screen is black/blank or shows a spinner/progress, do NOT call 'done'.
+- Perform {"action": "wait", "duration": 2} then {"action": "screenshot"} and reassess.
+
 ### Screen Information
 
 - Resolution: 768x768 pixels
@@ -20,117 +25,88 @@ COMPUTER_TOOL_USAGE_GUIDE = """## Computer Control Tool Usage Guide
 - All coordinates must be integers within valid ranges
 
 
+### First-Turn Protocol (hard rule)
 
-### Action Parameters
+1) Always start with {"action": "screenshot"}.
+2) If anything is still loading (spinner, progress, or blank areas), do NOT call "done". Instead:
+   - {"action": "wait", "duration": 2}, then {"action": "screenshot"} and reassess.
+3) Only after the page is stable, perform the next action (click/type/scroll/drag).
+4) Never call "done" on the first turn. Call "done" only after you have executed at least one valid non-screenshot action that advances the task and the goal is achieved.
 
 
+### Action Parameters (strict)
 
-1. **Mouse Actions** (require coordinate):
+- Mouse actions (require coordinate [x, y], integers 0–767):
+  - `left_click`, `right_click`, `double_click`, `triple_click`, `middle_click`, `mouse_move`
+  - Required: "coordinate": [x, y]
+  - Forbidden: "start_coordinate", "text", "duration", "scroll_direction", "scroll_amount"
 
-   - `left_click`: Click at [x, y]
+- Drag operations (require both):
+  - `left_click_drag`
+  - Required: "start_coordinate": [x, y] AND "coordinate": [x, y]
+  - Forbidden: "text", "duration", "scroll_direction", "scroll_amount"
 
-   - `right_click`: Right-click at [x, y]  
+- Keyboard actions:
+  - `type`: Required "text": your words or phrase; Forbidden: "coordinate", "start_coordinate", "duration"
+  - `key`: Required "text": one special key from [
+    "Return", "Enter", "Escape", "Tab", "Backspace", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Control", "Shift", "Alt", "Meta"
+    ]
+    Use `type` for words or phrases. Do not send words to `key`.
+  - `hold_key`: Required "text": one of ["Control", "Shift", "Alt", "Meta"], and required "duration" (seconds); Forbidden: coordinates
 
-   - `double_click`: Double-click at [x, y]
+- Scrolling:
+  - `scroll`: Required "scroll_direction" in ["up", "down", "left", "right"], and required "scroll_amount" (integer ≥ 1);
+    Forbidden: "coordinate", "start_coordinate", "text", "duration"
 
-   - `triple_click`: Triple-click at [x, y]
+- Utility actions:
+  - `screenshot`: No parameters at all. Do not add "duration" or coordinates.
+  - `wait`: Required "duration" (seconds). No coordinates.
+  - `cursor_position`: No parameters.
 
-   - `middle_click`: Middle-click at [x, y]
 
-   - `mouse_move`: Move cursor to [x, y]
+### Safety Checks (before every call)
 
+- Coordinates within bounds: x in [0, 767], y in [0, 767]
+- Do not pass empty lists for coordinates.
+- Do not include parameters that the action does not accept.
+- For drags, both "start_coordinate" and "coordinate" must be present.
 
 
-2. **Drag Operations** (require both start_coordinate and coordinate):
+### Wrong vs Correct
 
-   - `left_click_drag`: Drag from start_coordinate to coordinate
+Wrong (trying to type words with key):
+{"action":"key","text":"search this"}  ❌
+Correct:
+{"action":"type","text":"search this"}  ✅
 
-   
+Wrong (missing start_coordinate on drag):
+{"action":"left_click_drag","coordinate":[500,300]}  ❌
+Correct:
+{"action":"left_click_drag","start_coordinate":[100,100],"coordinate":[500,300]}  ✅
 
-3. **Keyboard Actions**:
+Wrong (adding params to screenshot):
+{"action":"screenshot","duration":3}  ❌
+Correct:
+{"action":"screenshot"}  ✅
 
-   - `type`: Enter text (text parameter required, no coordinate)
+Wrong (coordinates with type/key/screenshot/wait):
+{"action":"type","text":"hello","coordinate":[100,100]}  ❌
 
-   - `key`: Press special key like "Return", "Tab", "Escape" (text parameter)
 
-   - `hold_key`: Hold modifier key for duration seconds
+### Minimal Flow Example
 
-
-
-4. **Scrolling**:
-
-   - `scroll`: Requires scroll_direction ("up"/"down"/"left"/"right") and scroll_amount
-
-
-
-5. **Utility Actions**:
-
-   - `screenshot`: Take screenshot (no parameters needed)
-
-   - `wait`: Pause for duration seconds
-
-   - `cursor_position`: Get current cursor position
-
-
-
-### Common Mistakes to Avoid:
-
-❌ DO NOT use string labels for coordinates: ["search_bar", "end"]
-
-❌ DO NOT use negative coordinates: [-1, 48]  
-
-❌ DO NOT mix action types with wrong parameters
-
-❌ DO NOT use coordinate parameter with type/key actions
-
-✅ DO use integer coordinates: [683, 400]
-
-✅ DO take screenshots first to see the screen
-
-✅ DO verify coordinates are within bounds (x: 0-1365, y: 0-767)
-
-
-
-### Correct Examples:
-
-# Take screenshot first to see what's on screen
-
-{"action": "screenshot"}
-
-
-
-# Click on a button at specific location
-
-{"action": "left_click", "coordinate": [500, 300]}
-
-
-
-# Type text (no coordinate needed)
-
-{"action": "type", "text": "Hello World"}
-
-
-
-# Press Enter key
-
-{"action": "key", "text": "Return"}
-
-
-
-# Drag from one point to another
-
-{"action": "left_click_drag", "start_coordinate": [100, 100], "coordinate": [500, 500]}
-
-
-
-# Scroll down 5 steps
-
-{"action": "scroll", "scroll_direction": "down", "scroll_amount": 5}
+{"action":"screenshot"}
+{"action":"wait","duration":2}
+{"action":"screenshot"}
+{"action":"left_click","coordinate":[500,300]}
+{"action":"type","text":"hello world"}
+{"action":"key","text":"Return"}
 
 
 ### Completion
 
-- done: Signal final completion and include a brief summary of the outcome. Only call this when the user's task is truly finished. If a page is still loading or more steps remain, keep using actions like `screenshot`, `wait`, `click`, `type`, and `scroll` instead of calling `done`.
+- `done`: Only when the task objective is met and no further actions are needed.
+- Never use `done` to indicate a page is loading; use `wait` then `screenshot` instead.
 """
 
 

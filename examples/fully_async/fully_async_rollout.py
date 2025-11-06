@@ -210,13 +210,13 @@ async def generate_rollout_async(args, rollout_id: int, data_buffer) -> List[Lis
                 # don't count as processed for training
                 continue
 
-            if do_print:
-                print(
-                    f"First rollout sample: {[group[0].prompt + group[0].response]}, "
-                    f"label: {group[0].label}, reward: {group[0].reward}",
-                    flush=True,
-                )
-                do_print = False
+            # if do_print:
+            #     print(
+            #         f"First rollout sample: {[group[0].prompt + group[0].response]}, "
+            #         f"label: {group[0].label}, reward: {group[0].reward}",
+            #         flush=True,
+            #     )
+            #     do_print = False
 
             # Simplified: directly add samples, no filters used
             data.append(group)

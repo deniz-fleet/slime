@@ -14,7 +14,6 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
     meta = sample.metadata if isinstance(sample.metadata, dict) else {}
     task_key: Optional[str] = meta.get("task_key")
     env_key: Optional[str] = meta.get("env_key")
-    print(f"processing {task_key=} and {env_key=}")
 
     if not task_key:
         raise ValueError("Missing task_key; include in sample.metadata['task_key'] or --task-key")
@@ -31,7 +30,6 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
     if not env_key:
         raise ValueError("Unable to determine env_key from task or args")
 
-    print(f"evaluating task {task_key} with env {env_key}")
     env = await fleet.env.make_async(
         env_key=env_key,
         data_key=data_key,
@@ -42,7 +40,10 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
     try:
         # Verify and extract a numeric score
         detailed = await task.verify_detailed_async(env)
-        print(f"detailed verification response: {detailed}")
+        print(
+            f"evaluating task {task_key} with env {env_key}"
+            f"detailed verification response: {detailed}"
+        )
 
         return 1
 

@@ -119,6 +119,9 @@ Wrong (coordinates with type/key/screenshot/wait):
 
 - `done`: Only when ALL Strict Completion Gate conditions are satisfied.
 - Never use `done` to report loading states or lack of content; use `wait` then `screenshot` until stable, then act.
+- Final Answer Requirement: when you call `done`, the `summary` MUST contain the direct, explicit answer to the user’s question (no meta statements like “identified” or “completed”). Include all requested fields in plain text.
+  - Example (Amazon reviews): provide exactly three lines, each with "Reviewer — Rating — Headline".
+  - Do not include tool logs or rationale in the summary; only the final answer.
 
 ### Tool Call Output (Qwen 2.5 parser)
 
@@ -130,7 +133,7 @@ Wrong (coordinates with type/key/screenshot/wait):
 - Reason first, then act: write 1–2 concise sentences of rationale, then emit the tool call block. Avoid extra text after the block.
 - Use valid, concise JSON for `arguments`.
 - If multiple actions are needed, emit one call now; wait for the tool result next turn before emitting another.
-- To finish, use the same format with `{"name":"done","arguments":{"summary":"..."}}`.
+- To finish, use the same format with `{"name":"done","arguments":{"summary":"<FINAL ANSWER HERE>"}}`. The summary must directly answer the user.
 
 ### Tool Call Grammar Enforcement (clarification)
 

@@ -242,6 +242,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     sample.metadata.setdefault("tool_trace", tool_trace)
     sample.metadata.setdefault("env_key", env_key)
     if isinstance(final_answer, str) and final_answer:
+        print(f"{final_answer=}")
         sample.metadata["final_answer"] = final_answer
 
     return sample

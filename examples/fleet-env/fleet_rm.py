@@ -53,6 +53,7 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
                     final_answer = sample.response.strip()
 
         # Verify and extract a numeric score
+        print(f"{final_answer=}")
         detailed = await task.verify_detailed_async(env, final_answer=final_answer)
         print(
             f"evaluating task {task_key} with env {env_key}",

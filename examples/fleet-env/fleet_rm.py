@@ -45,7 +45,7 @@ async def custom_rm(args, sample: Sample, **kwargs) -> float:
             f"detailed verification response: {detailed}"
         )
 
-        return 1
+        return detailed.result
 
 
     finally:

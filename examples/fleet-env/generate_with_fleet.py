@@ -94,8 +94,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
 
                         # Fallback: synthesize a tool call if model emitted raw JSON in content
                         fallback = False
+                        content_text = msg.get("content")
                         if not tool_calls:
-                            content_text = msg.get("content")
                             if isinstance(content_text, str):
                                 try:
                                     raw = json.loads(content_text)
@@ -130,7 +130,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                         _ppt(f"{fallback=} {tool_calls=}")
 
                         # Append assistant message with tool_calls to maintain context
-                        messages.append({"role": "assistant", "content": (msg.get("content") or ""), "tool_calls": tool_calls})
+                        messages.append({"role": "assistant", "content":content_text, "tool_calls": tool_calls})
 
                         if not tool_calls:
                             _ppt("no tool_calls; continuing to next turn")
@@ -199,7 +199,6 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                         except Exception:
                                             pass
                             
-                            print(f"{result_str=}")
                             messages.append({
                                 "role": "tool",
                                 "tool_call_id": tc.get("id"),
@@ -213,8 +212,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                 "result_text": result_str,
                             }
                         
-                            # Upload screenshot to S3 via Fleet API and add URL to trace
-                            if isinstance(base64_data_url, str) and api_key:
+                            # Upload screenshot to S3 via Fleet API and add URL to trace and messages.
+                            if isinstance(base64_data_url, str):
                                 # Extract pure base64 payload from possible data URL
                                 b64_payload = base64_data_url.split(",", 1)[-1] if "," in base64_data_url else base64_data_url
                                 task_key = (getattr(sample, "metadata", {}) or {}).get("task_key", "unknown")
@@ -223,8 +222,14 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                 if isinstance(uploaded_url, str):
                                     trace_entry["image_url"] = uploaded_url
                                     print(f"{trace_entry['image_url']=}")
-                            elif isinstance(base64_data_url, str) and not api_key:
-                                _ppt("FLEET_API_KEY not provided; skipping image upload")
+                                    messages.append({
+                                            "role": "user",
+                                            "content": [
+                                                {"type": "image_url", "image_url": {"url": safe_image_url}},
+                                                {"type": "text", "text": "Observation screenshot"},
+                                            ],
+                                        })
+                            
                         
                             tool_trace.append(trace_entry)
 
@@ -239,7 +244,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     # Finalize sample
     _pp(f"finalizing sample with {len(tool_trace)} tool calls")
     if sample.metadata.get("final_answer") is None:
-        sample.metadata["final_answer"] = result_str
+        sample.metadata["final_answer"] = content_text
     sample.response = json.dumps({"steps": tool_trace}, ensure_ascii=False)
     sample.status = Sample.Status.COMPLETED
     sample.metadata.setdefault("tool_trace", tool_trace)

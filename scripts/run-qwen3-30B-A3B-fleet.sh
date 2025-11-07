@@ -62,11 +62,11 @@ EVAL_ARGS=(
 )
 
 PERF_ARGS=(
-   --tensor-model-parallel-size 4
+   --tensor-model-parallel-size 1
    --sequence-parallel
    --context-parallel-size 1
    #--expert-model-parallel-size 8
-   --expert-model-parallel-size 4
+   --expert-model-parallel-size 1
    --expert-tensor-parallel-size 1
 
    --recompute-granularity full
@@ -109,13 +109,13 @@ WANDB_ARGS=(
 )
 
 SGLANG_ARGS=(
-   --rollout-num-gpus-per-engine 8
+   --rollout-num-gpus-per-engine 1
    --sglang-mem-fraction-static 0.7
    --sglang-cuda-graph-bs 1 2 4 8 $(seq 16 8 256)
    --actor-num-gpus-per-node 1 # for debugging
    --sglang-disable-cuda-graph
    --debug-rollout-only
-   --sglang-tool-call-parser qwen
+   --sglang-tool-call-parser qwen25
    --sglang-grammar-backend xgrammar
 
 )

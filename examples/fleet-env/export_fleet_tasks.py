@@ -22,11 +22,13 @@ def export_tasks(env_key: str, out_path: str, version: str | None = None,
         env_key=env_key, version=version, data_id=data_id, data_version=data_version
     )
 
+
     def _record(task) -> Dict[str, Any]:
         meta = dict(task.metadata or {})
         # Ensure RM can resolve keys from sample.metadata
         meta.setdefault("task_key", task.key)
         meta.setdefault("env_key", task.env_key)
+        print(f"{task.prompt}")
         return {
             "prompt": task.prompt,
             "task_key": task.key,

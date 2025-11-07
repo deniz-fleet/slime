@@ -138,6 +138,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
 
                         # Execute tool calls and add role='tool' messages
                         # forcing a single tool call for now
+                        result_str = ""
                         for tc in tool_calls[:1]:
                             name = (tc.get("function") or {}).get("name")
                             arguments = (tc.get("function") or {}).get("arguments") or "{}"

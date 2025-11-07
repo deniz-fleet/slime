@@ -75,12 +75,9 @@ SGLANG_ARGS=(
    --sglang-disable-cuda-graph
    --sglang-max-prefill-tokens 128
    --debug-rollout-only
-   --sglang-tool-call-parser glm
+   --sglang-tool-call-parser qwen25
    --sglang-grammar-backend xgrammar
    --sglang-allow-auto-truncate
-)
-CHAT_ARGS=(
-  --apply-chat-template
 )
 OPTIMIZER_ARGS=(
   --optimizer adam

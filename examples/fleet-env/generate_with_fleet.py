@@ -4,6 +4,7 @@ import os
 import re
 from typing import Any, Dict, List
 import aiohttp
+from datetime import datetime
 
 import fleet
 from mcp import ClientSession
@@ -33,6 +34,13 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     """
     chat_url = f"http://{args.sglang_router_ip}:{args.sglang_router_port}/v1/chat/completions"
     
+    # Static rollout timestamp directory (UTC) for all assets in this generate() call
+    _rollout_now = datetime.utcnow()
+    _rollout_mm = _rollout_now.strftime("%m")
+    _rollout_dd = _rollout_now.strftime("%d")
+    _rollout_hh = _rollout_now.strftime("%H")
+    _rollout_task_key = (getattr(sample, "metadata", {}) or {}).get("task_key", "unknown")
+    _s3_rollout_prefix = f"slime/{_rollout_task_key}/{_rollout_mm}/{_rollout_dd}/{_rollout_hh}"
 
     def _pp(msg: str):
         task_key = (getattr(sample, "metadata", {}) or {}).get("task_key", "unknown")
@@ -216,8 +224,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                             if isinstance(base64_data_url, str):
                                 # Extract pure base64 payload from possible data URL
                                 b64_payload = base64_data_url.split(",", 1)[-1] if "," in base64_data_url else base64_data_url
-                                task_key = (getattr(sample, "metadata", {}) or {}).get("task_key", "unknown")
-                                s3_path = f"slime/{task_key}/turn_{turn:03d}.jpg"
+                                s3_path = f"{_s3_rollout_prefix}/turn_{turn:03d}.jpg"
                                 uploaded_url = await upload_image_to_s3(http_session, b64_payload, s3_path, api_key)
                                 if isinstance(uploaded_url, str):
                                     trace_entry["image_url"] = uploaded_url

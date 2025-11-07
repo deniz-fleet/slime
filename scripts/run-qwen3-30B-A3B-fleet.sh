@@ -32,6 +32,7 @@ CKPT_ARGS=(
 )
 
 ROLLOUT_ARGS=(
+  --prompt-data /root/fleet_tasks.jsonl
   --rollout-batch-size 1
   --n-samples-per-prompt 1
   --global-batch-size 1

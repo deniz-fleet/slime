@@ -109,7 +109,7 @@ SGLANG_ARGS=(
    --debug-rollout-only
    --sglang-tool-call-parser qwen25
    --sglang-grammar-backend xgrammar
-   --sglang-attention-backend sdpa
+   --sglang-attention-backend flex_attention # override for blackwell.
 
 )
 

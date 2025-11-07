@@ -222,6 +222,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                 uploaded_url = await upload_image_to_s3(http_session, b64_payload, s3_path, api_key)
                                 if isinstance(uploaded_url, str):
                                     trace_entry["image_url"] = uploaded_url
+                                    print(f"{trace_entry['image_url']=}")
                             elif isinstance(base64_data_url, str) and not api_key:
                                 _ppt("FLEET_API_KEY not provided; skipping image upload")
                         

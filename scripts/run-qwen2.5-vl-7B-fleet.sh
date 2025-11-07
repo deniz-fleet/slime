@@ -75,9 +75,12 @@ SGLANG_ARGS=(
    --sglang-disable-cuda-graph
    --sglang-max-prefill-tokens 128
    --debug-rollout-only
-   --sglang-tool-call-parser qwen25
+   --sglang-tool-call-parser glm
    --sglang-grammar-backend xgrammar
    --sglang-allow-auto-truncate
+)
+CHAT_ARGS=(
+  --apply-chat-template
 )
 OPTIMIZER_ARGS=(
   --optimizer adam
@@ -115,6 +118,7 @@ ray job submit --address="http://127.0.0.1:8265" \
   --use-slime-router \
   ${DEBUG_ARGS[@]} \
   ${SGLANG_ARGS[@]} \
+  ${CHAT_ARGS[@]} \
   ${MODEL_ARGS[@]} \
   ${CKPT_ARGS[@]} \
   ${ROLLOUT_ARGS[@]} \

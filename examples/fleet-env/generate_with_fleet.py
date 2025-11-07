@@ -225,7 +225,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                     messages.append({
                                             "role": "user",
                                             "content": [
-                                                {"type": "image_url", "image_url": {"url": safe_image_url}},
+                                                {"type": "image_url", "image_url": {"url": uploaded_url}},
                                                 {"type": "text", "text": "Observation screenshot"},
                                             ],
                                         })

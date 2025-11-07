@@ -81,7 +81,6 @@ SGLANG_ARGS=(
 )
 OPTIMIZER_ARGS=(
   --optimizer adam
-
   --lr 1e-6
 )
 
@@ -115,7 +114,6 @@ ray job submit --address="http://127.0.0.1:8265" \
   --use-slime-router \
   ${DEBUG_ARGS[@]} \
   ${SGLANG_ARGS[@]} \
-  ${CHAT_ARGS[@]} \
   ${MODEL_ARGS[@]} \
   ${CKPT_ARGS[@]} \
   ${ROLLOUT_ARGS[@]} \

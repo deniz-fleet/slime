@@ -102,7 +102,6 @@ SGLANG_ARGS=(
    --rollout-num-gpus-per-engine 1
    --sglang-mem-fraction-static 0.9
    --sglang-cuda-graph-bs 1 2 4 8 $(seq 16 8 256)
-   --actor-num-gpus-per-node 1 # for debugging
    --sglang-disable-cuda-graph
    --debug-rollout-only
    --sglang-tool-call-parser qwen25

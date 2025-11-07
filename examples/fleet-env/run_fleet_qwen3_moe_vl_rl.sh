@@ -9,9 +9,9 @@ export FLEET_API_KEY=${FLEET_API_KEY:-""}
 # # 1) Download model and export Fleet tasks
 # hf download Qwen/Qwen3-VL-8B-Thinking --local-dir /root/Qwen3-VL-8B-Thinking
 
-# python examples/fleet-env/export_fleet_tasks.py \
-#   --fleet-env amazon \
-#   --out /root/fleet_tasks.jsonl
+python examples/fleet-env/export_fleet_tasks.py \
+  --fleet-env amazon \
+  --out /root/fleet_tasks.jsonl
 
 # 2) Convert HF to torch dist (for RL)
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"

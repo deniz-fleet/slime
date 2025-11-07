@@ -2,7 +2,8 @@ Quickstart (Fleet MCP + Qwen3‑VL)
 
 1) Setup
 ```
-cd slime
+git clone https://github.com/deniz-fleet/slime.git
+git checkout deniz/fleet-integration
 pip install fleet-python
 pip install -U transformers
 pip install -U sglang
@@ -14,8 +15,8 @@ export WANDB_KEY=<your_wandb_api_key>
 
 2) Download models
 ```
+aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking-tp1-pp1/ /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp1-pp1
 aws s3 sync s3://rl-training-tests/models/Qwen3-VL-30B-A3B-Thinking /workspace/models/Qwen3-VL-30B-A3B-Thinking
-aws s3 sync s3://rl-training-tests/models/megatron_ckpts/ /workspace/models/megatron_ckpts/
 
 ```
 

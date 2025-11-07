@@ -139,7 +139,7 @@ ray job submit --address="http://127.0.0.1:8265" \
    --runtime-env-json="${RUNTIME_ENV_JSON}" \
    -- python3 train.py \
    --actor-num-nodes 1 \
-   --actor-num-gpus-per-node 8 \
+   --actor-num-gpus-per-node 4 \
    --colocate \
    --use-slime-router \
    ${DEBUG_ARGS[@]} \

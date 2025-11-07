@@ -24,6 +24,6 @@ source "${SLIME_ROOT}/scripts/models/qwen3-30B-A3B.sh"
 #   --save /root/Qwen3-VL-8B_torch_dist
 
 # 3) Run RL with separate train/rollout GPUs
-bash scripts/run-qwen3-vl-moe-fleet.sh
+bash scripts/run-qwen3-30B-A3B-fleet.sh
 
 

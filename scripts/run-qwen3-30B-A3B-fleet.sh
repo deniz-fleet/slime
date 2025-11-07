@@ -50,12 +50,6 @@ DEBUG_ARGS=(
    --save-debug-rollout-data /workspace/rollouts/{wandb_run_id}/
 )
 
-EVAL_ARGS=(
-   --eval-interval 20
-   --n-samples-per-eval-prompt 16
-   --eval-max-response-len 16384
-   --eval-top-p 0.7
-)
 
 PERF_ARGS=(
    --tensor-model-parallel-size 4
@@ -157,6 +151,5 @@ ray job submit --address="http://127.0.0.1:8265" \
    ${FLEET_ARGS[@]} \
    ${WANDB_ARGS[@]} \
    ${PERF_ARGS[@]} \
-   ${EVAL_ARGS[@]} \
    ${SGLANG_ARGS[@]} \
    ${MISC_ARGS[@]}

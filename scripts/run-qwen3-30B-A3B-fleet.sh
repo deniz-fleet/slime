@@ -33,9 +33,11 @@ CKPT_ARGS=(
 
 ROLLOUT_ARGS=(
   --prompt-data /root/fleet_tasks.jsonl
-  --rollout-batch-size 1
-  --n-samples-per-prompt 1
-  --global-batch-size 1
+  --input-key prompt
+  --metadata-key metadata
+  --rollout-batch-size 4
+  --n-samples-per-prompt 4
+  --global-batch-size 16
   --num-rollout 50
   --rollout-max-response-len 16384
 )

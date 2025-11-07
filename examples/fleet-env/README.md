@@ -22,6 +22,12 @@ chmod +x examples/fleet-env/run_fleet_qwen2_5_vl_7b_rl.sh
 bash examples/fleet-env/run_fleet_qwen3_vl_8b_rl.sh
 ```
 
+```
+# One‑shot convenience script
+chmod +x examples/fleet-env/run_fleet_qwen3_moe_vl_rl.sh
+bash examples/fleet-env/run_fleet_qwen3_moe_vl_rl.sh
+```
+
 What it does
 - Download HF model `Qwen/Qwen2.5-VL-7B-Instruct` locally (for consistent runs).
 - Export Fleet tasks to JSONL via API:

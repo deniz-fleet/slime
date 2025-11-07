@@ -16,13 +16,11 @@ export WANDB_KEY=<your_wandb_api_key>
 2) Download models
 ```
 aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking-tp1-pp1/ /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp1-pp1
-aws s3 sync s3://rl-training-tests/models/Qwen3-VL-30B-A3B-Thinking /workspace/models/Qwen3-VL-30B-A3B-Thinking
-
+aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking /workspace/models/Qwen3-VL-30B-A3B-Thinking
 ```
 
 
 3) Pipeline (export tasks → convert → run)
-
 ```
 bash examples/fleet-env/run_fleet_qwen3_moe_vl_rl.sh
 ```
@@ -32,7 +30,7 @@ Brief note on `scripts/run-qwen3-30B-A3B-fleet.sh`
 - Checkpoint paths should match your downloads:
   ```bash
   --hf-checkpoint /workspace/models/Qwen3-VL-30B-A3B-Thinking
-  --ref-load /workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp1-pp1
+  --ref-load /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp1-pp1
   ```
 - Custom paths for multi‑turn env interaction and verifiers:
   ```bash
@@ -53,7 +51,7 @@ Brief note on `scripts/run-qwen3-30B-A3B-fleet.sh`
   ```
 
 What it does
-- Download HF model `Qwen/Qwen2.5-VL-7B-Instruct` locally (for consistent runs).
+- Download HF model locally (for consistent runs).
 - Export Fleet tasks to JSONL via API:
   ```bash
   python examples/fleet-env/export_fleet_tasks.py --fleet-env amazon --out /root/fleet_tasks.jsonl

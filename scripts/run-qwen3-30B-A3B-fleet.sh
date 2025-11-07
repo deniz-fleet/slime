@@ -106,7 +106,6 @@ SGLANG_ARGS=(
    --sglang-mem-fraction-static 0.9
    --sglang-cuda-graph-bs 1 2 4 8 $(seq 16 8 256)
    --sglang-disable-cuda-graph
-   --debug-rollout-only
    --sglang-tool-call-parser qwen
    --sglang-grammar-backend xgrammar
    --sglang-attention-backend flex_attention # override for blackwell.

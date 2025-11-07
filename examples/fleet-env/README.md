@@ -1,32 +1,55 @@
-Quickstart (Fleet MCP + Qwen3‑VL RL)
+Quickstart (Fleet MCP + Qwen3‑VL)
 
 1) Setup
 ```
 cd slime
 pip install fleet-python
-pip install -e .
 pip install -U transformers
-export FLEET_API_KEY=sk_BdFKC2l8LqWzhQ36AdRB4GQHBYsBbODvrIAfXvxn3G4
-export WANDB_KEY=f66373399824f8c1942490b0862a664b8afc8802
+pip install -U sglang
+pip install -e .
+
+export FLEET_API_KEY=<your_fleet_api_key>
+export WANDB_KEY=<your_wandb_api_key>
 ```
 
+2) Download models
 ```
-git checkout -- examples/fleet-env/run_fleet_qwen2_5_vl_7b_rl.sh
-chmod +x examples/fleet-env/run_fleet_qwen2_5_vl_7b_rl.sh
-./examples/fleet-env/run_fleet_qwen2_5_vl_7b_rl.sh
-```
-
-2) RL‑only pipeline (download → export tasks → convert → run)
-```
-# One‑shot convenience script
-bash examples/fleet-env/run_fleet_qwen3_vl_8b_rl.sh
-```
+aws s3 sync s3://rl-training-tests/models/Qwen3-VL-30B-A3B-Thinking /workspace/models/Qwen3-VL-30B-A3B-Thinking
+aws s3 sync s3://rl-training-tests/models/megatron_ckpts/ /workspace/models/megatron_ckpts/
 
 ```
-# One‑shot convenience script
-chmod +x examples/fleet-env/run_fleet_qwen3_moe_vl_rl.sh
+
+
+3) Pipeline (export tasks → convert → run)
+
+```
 bash examples/fleet-env/run_fleet_qwen3_moe_vl_rl.sh
 ```
+
+Brief note on `scripts/run-qwen3-30B-A3B-fleet.sh`
+- The script is comprised of RL flags, Megatron flags, and SGLang flags.
+- Checkpoint paths should match your downloads:
+  ```bash
+  --hf-checkpoint /workspace/models/Qwen3-VL-30B-A3B-Thinking
+  --ref-load /workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp1-pp1
+  ```
+- Custom paths for multi‑turn env interaction and verifiers:
+  ```bash
+  --custom-generate-function-path examples.fleet-env.generate_with_fleet.generate
+  --custom-rm-path examples.fleet-env.fleet_rm.custom_rm
+  ```
+- Choose the Fleet environment:
+  ```bash
+  --fleet-env amazon
+  ```
+- Save rollouts for debugging:
+  ```bash
+  --save-debug-rollout-data /workspace/rollouts/{wandb_run_id}/
+  ```
+- Rollout‑only mode (no training step):
+  ```bash
+  --debug-rollout-only
+  ```
 
 What it does
 - Download HF model `Qwen/Qwen2.5-VL-7B-Instruct` locally (for consistent runs).
@@ -34,24 +57,15 @@ What it does
   ```bash
   python examples/fleet-env/export_fleet_tasks.py --fleet-env amazon --out /root/fleet_tasks.jsonl
   ```
-- Convert HF → TorchDist for RL:
-  ```bash
-  source scripts/models/qwen2.5-7B.sh
-  PYTHONPATH=/root/Megatron-LM python tools/convert_hf_to_torch_dist.py \
-    ${MODEL_ARGS[@]} \
-    --hf-checkpoint /root/Qwen2.5-VL-7B-Instruct \
-    --save /root/Qwen2.5-VL-7B_torch_dist
-  ```
-- Launch training with separate GPUs for train vs rollout:
-  ```bash
-  bash scripts/run-qwen3-vl-8B-fleet.sh
-  ```
 
-Custom hooks used
+Custom hooks used to interact with Fleet environment
 - Generate (multi‑turn Fleet MCP tool loop): `examples/fleet-env/generate_with_fleet.py:generate`
 - Reward (verify_detailed_async): `examples/fleet-env/fleet_rm.py:custom_rm`
 
 Model reference
 - Qwen/Qwen2.5‑VL‑7B‑Instruct: https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct
+- Qwen/Qwen3-VL-30B-A3B-Thinking: https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Thinking
 
+
+For more information, see the slime Usage Guide: `https://thudm.github.io/slime/get_started/usage.html`
 

@@ -24,17 +24,14 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${SCRIPT_DIR}/models/qwen3-30B-A3B.sh"
 
 CKPT_ARGS=(
-   --hf-checkpoint /workspace/models/Qwen3-VL-30B-A3B-Thinking # THIS WILL CHANGE TO HF MODEL PATH
-   --ref-load /workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp1-pp1 # THIS WILL CHANGE TO HF MODEL PATH
+   --hf-checkpoint /workspace/models/Qwen3-VL-30B-A3B-Thinking 
+   --ref-load /workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp1-pp1
    --load /root/Qwen3-VL-30B-A3B-slime/
    --save /root/Qwen3-VL-30B-A3B-slime/
    --save-interval 20
 )
 
 ROLLOUT_ARGS=(
-  --prompt-data /root/fleet_tasks.jsonl
-  --input-key prompt
-  --metadata-key metadata
   --rollout-batch-size 1
   --n-samples-per-prompt 1
   --global-batch-size 1
@@ -55,7 +52,6 @@ DEBUG_ARGS=(
 
 EVAL_ARGS=(
    --eval-interval 20
-   --eval-prompt-data aime /root/aime-2024/aime-2024.jsonl
    --n-samples-per-eval-prompt 16
    --eval-max-response-len 16384
    --eval-top-p 0.7

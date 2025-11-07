@@ -24,6 +24,6 @@ PYTHONPATH=/root/Megatron-LM python tools/convert_hf_to_torch_dist.py \
   --save /root/Qwen3-VL-8B_torch_dist
 
 # 3) Run RL with separate train/rollout GPUs
-bash scripts/run-qwen3-vl-8B-fleet.sh
+bash scripts/run-qwen3-vl-moe-fleet.sh
 
 

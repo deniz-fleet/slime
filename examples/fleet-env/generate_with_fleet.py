@@ -174,9 +174,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                 continue
                             
                             result = await session.call_tool(name, parsed_args)
-                            # Avoid printing raw/binary blobs
                             # Extract textual observation and optional screenshot
-                            result_str = ""
                             base64_data_url = None
                             
                             if getattr(result, "content", None):
@@ -200,7 +198,8 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
                                                 base64_data_url = parsed.get("base64_image")
                                         except Exception:
                                             pass
-                        
+                            
+                            print(f"{result_str=}")
                             messages.append({
                                 "role": "tool",
                                 "tool_call_id": tc.get("id"),

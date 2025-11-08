@@ -40,6 +40,7 @@ ROLLOUT_ARGS=(
   --global-batch-size 2
   --num-rollout 8
   --rollout-max-response-len 16384
+  --debug-train-only
 )
 
 FLEET_ARGS=(

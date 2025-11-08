@@ -10,7 +10,7 @@ CONVERT_PY="${PAI_PATCH_DIR}/toolkits/distributed_checkpoints_convertor/impl/con
 
 # ----- data I/O (under /workspace/data) -----
 HF_DIR="/workspace/models/Qwen3-VL-30B-A3B-Thinking"
-OUT_DIR="/workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp4-pp1"
+OUT_DIR="/workspace/models/Qwen3-VL-30B-A3B-Thinking-tp4-pp1"
 
 ----- repo roots -----
 mkdir -p "${PAI_PATCH_DIR}"

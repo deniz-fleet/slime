@@ -60,7 +60,7 @@ PERF_ARGS=(
    --sequence-parallel
    --context-parallel-size 1
    #--expert-model-parallel-size 8
-   --expert-model-parallel-size 2
+   --expert-model-parallel-size 4
    --expert-tensor-parallel-size 1
 
    --recompute-granularity full

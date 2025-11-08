@@ -64,10 +64,12 @@ PERF_ARGS=(
 
    --recompute-granularity full
    --recompute-method uniform
-   --recompute-num-layers 4
+   --recompute-num-layers 1
 
    --use-dynamic-batch-size
    --max-tokens-per-gpu 1024
+
+   --debug-train-only
 )
 
 GRPO_ARGS=(
@@ -90,9 +92,9 @@ OPTIMIZER_ARGS=(
    # Torch optimizer distributed
    --use-distributed-optimizer
    # --use-precision-aware-optimizer
-   # --optimizer-cpu-offload
-   # --optimizer-offload-fraction 1.0
-   # --overlap-cpu-optimizer-d2h-h2d
+   --optimizer-cpu-offload
+   --optimizer-offload-fraction 1.0
+   --overlap-cpu-optimizer-d2h-h2d
 )
 
 WANDB_ARGS=(

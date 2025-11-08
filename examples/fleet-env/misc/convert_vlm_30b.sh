@@ -12,7 +12,7 @@ CONVERT_PY="${PAI_PATCH_DIR}/toolkits/distributed_checkpoints_convertor/impl/con
 HF_DIR="/workspace/models/Qwen3-VL-30B-A3B-Thinking"
 OUT_DIR="/workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp4-pp1"
 
-# ----- repo roots -----
+----- repo roots -----
 mkdir -p "${PAI_PATCH_DIR}"
 git clone https://github.com/alibaba/Pai-Megatron-Patch.git "${PAI_PATCH_DIR}"
 cd "${PAI_PATCH_DIR}"
@@ -49,10 +49,10 @@ echo "Using PYTHONPATH:"
 echo "  1) ${MEGATRON_BACKEND_DIR}"
 echo "  2) ${PAI_PATCH_DIR}"
 
-
 # ----- run conversion (single proc, bf16) -----
 echo "==> Converting HF → Megatron (Qwen3-VL-30B-A3B, single GPU, bf16)"
 env -i PATH="$PATH" CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" \
+  CUDA_DEVICE_MAX_CONNECTIONS=1 \
   PYTHONNOUSERSITE=1 PYTHONPATH="${MEGATRON_BACKEND_DIR}:${PAI_PATCH_DIR}" \
   python -m torch.distributed.run --nproc_per_node=8 \
     "${CONVERT_PY}" \

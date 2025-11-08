@@ -91,7 +91,7 @@ OPTIMIZER_ARGS=(
    --adam-beta2 0.98
    # Torch optimizer distributed
    --use-distributed-optimizer
-   # --use-precision-aware-optimizer
+   --use-precision-aware-optimizer
    --optimizer-cpu-offload
    --optimizer-offload-fraction 1.0
    --overlap-cpu-optimizer-d2h-h2d

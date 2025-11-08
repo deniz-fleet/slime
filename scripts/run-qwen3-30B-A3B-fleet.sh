@@ -83,18 +83,12 @@ GRPO_ARGS=(
 )
 
 OPTIMIZER_ARGS=(
-   --optimizer adam
+   --optimizer deepspeed_cpu_adam
    --lr 1e-6
    --lr-decay-style constant
    --weight-decay 0.1
    --adam-beta1 0.9
    --adam-beta2 0.98
-   # Enable distributed optimizer with CPU offload to reduce GPU memory
-   --use-distributed-optimizer
-   --use-precision-aware-optimizer
-   --optimizer-cpu-offload
-   --optimizer-offload-fraction 1.0
-   --overlap-cpu-optimizer-d2h-h2d
 )
 
 WANDB_ARGS=(

@@ -10,7 +10,7 @@ CONVERT_PY="${PAI_PATCH_DIR}/toolkits/distributed_checkpoints_convertor/impl/con
 
 # ----- data I/O (under /workspace/data) -----
 HF_DIR="/workspace/models/Qwen3-VL-30B-A3B-Thinking"
-OUT_DIR="/workspace/models/Qwen3-VL-30B-A3B-Thinking-tp4-pp1"
+OUT_DIR="/workspace/models/Qwen3-VL-30B-A3B-Thinking-tp2-ep4"
 
 ----- repo roots -----
 mkdir -p "${PAI_PATCH_DIR}"
@@ -71,7 +71,7 @@ env -i PATH="$PATH" CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     --no-load-optim --no-load-rng --logging-level 1 \
     --bf16 --use-gpu \
     --sequence-parallel \
-    --tensor-model-parallel-size 4 --pipeline-model-parallel-size 1 --expert-model-parallel-size 2 \
+    --tensor-model-parallel-size 2 --pipeline-model-parallel-size 1 --expert-model-parallel-size 4 \
     --micro-batch-size 1 --global-batch-size 4  --train-iters 1 \
     --normalization RMSNorm --swiglu --disable-bias-linear --seq-length 1 \
     --attention-backend auto --position-embedding-type mrope --group-query-attention \

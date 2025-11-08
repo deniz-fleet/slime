@@ -57,7 +57,7 @@ DEBUG_ARGS=(
 
 PERF_ARGS=(
    --tensor-model-parallel-size 1
-   --sequence-parallel
+   #--sequence-parallel
    --context-parallel-size 1
    --expert-model-parallel-size 8
    --expert-tensor-parallel-size 1
@@ -81,7 +81,7 @@ GRPO_ARGS=(
 )
 
 OPTIMIZER_ARGS=(
-   --optimizer sgd
+   --optimizer adam
    --lr 1e-6
    --lr-decay-style constant
    --weight-decay 0.1

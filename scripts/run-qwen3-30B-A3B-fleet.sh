@@ -69,7 +69,7 @@ PERF_ARGS=(
 
    # --micro-batch-size 1
    --use-dynamic-batch-size
-   --max-tokens-per-gpu 20480
+   --max-tokens-per-gpu 8192
 )
 
 GRPO_ARGS=(
@@ -114,8 +114,8 @@ MISC_ARGS=(
    --attention-dropout 0.0
    --hidden-dropout 0.0
    # should be good for model performance
-   --accumulate-allreduce-grads-in-fp32
-   --attention-softmax-in-fp32
+   # --accumulate-allreduce-grads-in-fp32
+   # --attention-softmax-in-fp32
    # need to comment this when using model with MLA
    --attention-backend flash
 )

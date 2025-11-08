@@ -1,6 +1,7 @@
 Quickstart (Fleet MCP + Qwen3‑VL)
 
 1) Setup
+Starting inside the [slime container](https://github.com/deniz-fleet/slime/tree/main/docker)
 ```
 git clone https://github.com/deniz-fleet/slime.git
 git checkout deniz/fleet-integration

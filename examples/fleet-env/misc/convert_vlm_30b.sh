@@ -3,17 +3,22 @@
 # Single GPU, bf16, outputs to /workspace/data/models/megatron_ckpts/...
 
 set -euo pipefail
-
-# ----- repo roots -----
 PAI_PATCH_DIR="/workspace/code/Pai-Megatron-Patch"
 MEGATRON_BACKEND_DIR="${PAI_PATCH_DIR}/backends/megatron/Megatron-LM-250624"  # vendored, has core+training
-
 # ----- converter entry (define AFTER PAI_PATCH_DIR!) -----
 CONVERT_PY="${PAI_PATCH_DIR}/toolkits/distributed_checkpoints_convertor/impl/convert.py"
 
 # ----- data I/O (under /workspace/data) -----
 HF_DIR="/workspace/models/Qwen3-VL-30B-A3B-Thinking"
 OUT_DIR="/workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp4-pp1"
+
+# ----- repo roots -----
+mkdir -p "${PAI_PATCH_DIR}"
+git clone https://github.com/alibaba/Pai-Megatron-Patch.git "${PAI_PATCH_DIR}"
+cd "${PAI_PATCH_DIR}"
+git submodule update --init --recursive
+cd ../..
+
 
 # ----- tiny deps: pin hub for transformers in the container; no HF snapshot here -----
 python - <<'PY'
@@ -49,7 +54,7 @@ echo "  2) ${PAI_PATCH_DIR}"
 echo "==> Converting HF → Megatron (Qwen3-VL-30B-A3B, single GPU, bf16)"
 env -i PATH="$PATH" CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" \
   PYTHONNOUSERSITE=1 PYTHONPATH="${MEGATRON_BACKEND_DIR}:${PAI_PATCH_DIR}" \
-  python -m torch.distributed.run --nproc_per_node=1 \
+  python -m torch.distributed.run --nproc_per_node=8 \
     "${CONVERT_PY}" \
     --model-type GPT \
     --load-dir "${HF_DIR}" \
@@ -64,7 +69,7 @@ env -i PATH="$PATH" CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" \
     --no-load-optim --no-load-rng --logging-level 1 \
     --bf16 --use-gpu \
     --tensor-model-parallel-size 4 --pipeline-model-parallel-size 1 --expert-model-parallel-size 8 \
-    --micro-batch-size 1 --global-batch-size 1 --train-iters 1 \
+    --micro-batch-size 1 --global-batch-size 4  --train-iters 1 \
     --normalization RMSNorm --swiglu --disable-bias-linear --seq-length 1 \
     --attention-backend auto --position-embedding-type mrope --group-query-attention \
     --kv-channels 128 --qk-layernorm --max-position-embeddings 262144 --padded-vocab-size 151936 \

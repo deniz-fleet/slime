@@ -17,6 +17,7 @@ export WANDB_KEY=<your_wandb_api_key>
 2) Download models (or convert them with different parallelism configurations)
 ```
 # Convert HF → Megatron (tp4-pp1), then start the RL run
+# (This takes a loooong time)
 bash examples/fleet-env/misc/convert_vlm_30b.sh
 ```
 or download the existing converted Megatron checkpoint.

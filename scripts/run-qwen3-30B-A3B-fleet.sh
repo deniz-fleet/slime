@@ -90,6 +90,7 @@ OPTIMIZER_ARGS=(
    # Torch optimizer distributed
    --ckpt-format torch_dist
    --use-distributed-optimizer
+   --use-precision-aware-optimizer
    --optimizer-cpu-offload
    --optimizer-offload-fraction 1.0
    --overlap-cpu-optimizer-d2h-h2d

@@ -87,8 +87,12 @@ OPTIMIZER_ARGS=(
    --weight-decay 0.1
    --adam-beta1 0.9
    --adam-beta2 0.98
-   # Torch optimizer
-   --ckpt-format torch_dcp
+   # Torch optimizer distributed
+   --ckpt-format torch_dist
+   --use-distributed-optimizer
+   --optimizer-cpu-offload
+   --optimizer-offload-fraction 1.0
+   --overlap-cpu-optimizer-d2h-h2d
 )
 
 WANDB_ARGS=(

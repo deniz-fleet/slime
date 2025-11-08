@@ -10,7 +10,7 @@ export FLEET_API_KEY=${FLEET_API_KEY:-""}
 hf download Qwen/Qwen2.5-VL-7B-Instruct --local-dir /root/Qwen2.5-VL-7B-Instruct
 
 python examples/fleet-env/export_fleet_tasks.py \
-  --fleet-env hubspot \
+  --fleet-env amazon \
   --out /root/fleet_tasks.jsonl
 
 # 2) Convert HF to torch dist (for RL)

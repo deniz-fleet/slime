@@ -19,8 +19,9 @@ export WANDB_KEY=<your_wandb_api_key>
 # Convert HF → Megatron (tp4-pp1), then start the RL run
 bash examples/fleet-env/misc/convert_vlm_30b.sh
 ```
+or download the existing converted Megatron checkpoint.
 ```
-aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking-tp1-pp1/ /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp4-pp1
+aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking-tp4-pp1/ /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp4-pp1
 aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking /workspace/models/Qwen3-VL-30B-A3B-Thinking &
 ```
 

@@ -25,7 +25,7 @@ source "${SCRIPT_DIR}/models/qwen3-30B-A3B.sh"
 
 CKPT_ARGS=(
    --hf-checkpoint /workspace/models/Qwen3-VL-30B-A3B-Thinking 
-   --ref-load /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp4-pp1
+   --ref-load /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp1-pp1
    --load /root/Qwen3-VL-30B-A3B-slime/
    --save /root/Qwen3-VL-30B-A3B-slime/
    --save-interval 20
@@ -56,10 +56,10 @@ DEBUG_ARGS=(
 
 
 PERF_ARGS=(
-   --tensor-model-parallel-size 4
+   --tensor-model-parallel-size 2
    --sequence-parallel
    --context-parallel-size 1
-   --expert-model-parallel-size 2
+   --expert-model-parallel-size 4
    --expert-tensor-parallel-size 1
 
    --recompute-granularity full

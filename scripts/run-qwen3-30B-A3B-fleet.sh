@@ -35,9 +35,9 @@ ROLLOUT_ARGS=(
   --prompt-data /root/fleet_tasks.jsonl
   --input-key prompt
   --metadata-key metadata
-  --rollout-batch-size 1
-  --n-samples-per-prompt 2
-  --global-batch-size 2
+  --rollout-batch-size 4
+  --n-samples-per-prompt 2 
+  --global-batch-size 8
   --num-rollout 8
   --rollout-max-response-len 16384
   --debug-train-only

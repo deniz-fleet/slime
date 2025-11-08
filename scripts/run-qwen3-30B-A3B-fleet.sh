@@ -89,10 +89,6 @@ OPTIMIZER_ARGS=(
    --adam-beta2 0.98
    # Megatron distributed optimizer + CPU offload
    --use-distributed-optimizer
-   --use-precision-aware-optimizer
-   --optimizer-cpu-offload
-   --optimizer-offload-fraction 1.0
-   --overlap-cpu-optimizer-d2h-h2d
 )
 
 WANDB_ARGS=(

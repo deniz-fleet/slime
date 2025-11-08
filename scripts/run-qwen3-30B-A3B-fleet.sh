@@ -56,10 +56,10 @@ DEBUG_ARGS=(
 
 
 PERF_ARGS=(
-   --tensor-model-parallel-size 1
+   --tensor-model-parallel-size 2
    #--sequence-parallel
    --context-parallel-size 1
-   --expert-model-parallel-size 8
+   --expert-model-parallel-size 4
    --expert-tensor-parallel-size 1
 
    --recompute-granularity full
@@ -67,7 +67,7 @@ PERF_ARGS=(
    --recompute-num-layers 4
 
    --use-dynamic-batch-size
-   --max-tokens-per-gpu 4096
+   --max-tokens-per-gpu 2048
 )
 
 GRPO_ARGS=(

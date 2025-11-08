@@ -13,7 +13,7 @@ CONVERT_PY="${PAI_PATCH_DIR}/toolkits/distributed_checkpoints_convertor/impl/con
 
 # ----- data I/O (under /workspace/data) -----
 HF_DIR="/workspace/models/Qwen3-VL-30B-A3B-Thinking"
-OUT_DIR="/workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp1-pp1"
+OUT_DIR="/workspace/models/megatron_ckpts/Qwen3-VL-30B-A3B-Thinking-tp4-pp1"
 
 # ----- tiny deps: pin hub for transformers in the container; no HF snapshot here -----
 python - <<'PY'
@@ -63,7 +63,7 @@ env -i PATH="$PATH" CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" \
     --auto-model AutoModelForImageTextToText \
     --no-load-optim --no-load-rng --logging-level 1 \
     --bf16 --use-gpu \
-    --tensor-model-parallel-size 1 --pipeline-model-parallel-size 1 --expert-model-parallel-size 1 \
+    --tensor-model-parallel-size 4 --pipeline-model-parallel-size 1 --expert-model-parallel-size 8 \
     --micro-batch-size 1 --global-batch-size 1 --train-iters 1 \
     --normalization RMSNorm --swiglu --disable-bias-linear --seq-length 1 \
     --attention-backend auto --position-embedding-type mrope --group-query-attention \

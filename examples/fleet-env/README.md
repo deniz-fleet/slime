@@ -14,9 +14,13 @@ export FLEET_API_KEY=<your_fleet_api_key>
 export WANDB_KEY=<your_wandb_api_key>
 ```
 
-2) Download models
+2) Download models (or convert them with different parallelism configurations)
 ```
-aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking-tp1-pp1/ /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp1-pp1
+# Convert HF → Megatron (tp4-pp1), then start the RL run
+bash examples/fleet-env/misc/convert_vlm_30b.sh
+```
+```
+aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking-tp1-pp1/ /workspace/models/Qwen3-VL-30B-A3B-Thinking-tp4-pp1
 aws s3 sync s3://rl-training-tests/Qwen3-VL-30B-A3B-Thinking /workspace/models/Qwen3-VL-30B-A3B-Thinking &
 ```
 

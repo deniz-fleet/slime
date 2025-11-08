@@ -51,7 +51,9 @@ echo "  2) ${PAI_PATCH_DIR}"
 
 # ----- run conversion (single proc, bf16) -----
 echo "==> Converting HF → Megatron (Qwen3-VL-30B-A3B, single GPU, bf16)"
-env -i PATH="$PATH" CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" \
+env -i PATH="$PATH" CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+  TORCH_DISTRIBUTED_DEBUG=DETAIL \
+  NCCL_DEBUG=INFO \
   CUDA_DEVICE_MAX_CONNECTIONS=1 \
   PYTHONNOUSERSITE=1 PYTHONPATH="${MEGATRON_BACKEND_DIR}:${PAI_PATCH_DIR}" \
   python -m torch.distributed.run --nproc_per_node=8 \
@@ -68,7 +70,8 @@ env -i PATH="$PATH" CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" \
     --auto-model AutoModelForImageTextToText \
     --no-load-optim --no-load-rng --logging-level 1 \
     --bf16 --use-gpu \
-    --tensor-model-parallel-size 4 --pipeline-model-parallel-size 1 --expert-model-parallel-size 8 \
+    --sequence-parallel \
+    --tensor-model-parallel-size 4 --pipeline-model-parallel-size 1 --expert-model-parallel-size 2 \
     --micro-batch-size 1 --global-batch-size 4  --train-iters 1 \
     --normalization RMSNorm --swiglu --disable-bias-linear --seq-length 1 \
     --attention-backend auto --position-embedding-type mrope --group-query-attention \

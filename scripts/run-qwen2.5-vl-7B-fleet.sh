@@ -51,7 +51,7 @@ DEBUG_ARGS=(
 FLEET_ARGS=(
   --custom-generate-function-path examples.fleet-env.generate_with_fleet.generate
   --custom-rm-path examples.fleet-env.fleet_rm.custom_rm
-  --fleet-env amazon
+  --fleet-env hubspot
   --max-tool-turns 4
 )
 

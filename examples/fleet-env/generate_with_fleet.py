@@ -48,7 +48,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
 
 
     # Create Fleet env and MCP session; list tools once
-    env_key = getattr(args, "fleet_env", None) or getattr(args, "fleet_env_key", None)
+    env_key = getattr(args, "fleet_env", None)
     if not env_key:
         raise ValueError("--fleet-env is required for Fleet tool loop")
 
@@ -57,6 +57,7 @@ async def generate(args, sample: Sample, sampling_params: dict) -> Sample:
     env = await fleet.env.make_async(env_key=env_key, image_type="mcp", ttl_seconds=3600)
     mcp_url = f"{env.urls.root}api/v1/mcp"
     api_key = getattr(args, "fleet_api_key", None) or os.getenv("FLEET_API_KEY")
+    
     
     try:
         async with streamablehttp_client(url=mcp_url) as streams:

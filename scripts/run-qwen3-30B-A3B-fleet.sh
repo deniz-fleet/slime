@@ -59,15 +59,13 @@ PERF_ARGS=(
    --tensor-model-parallel-size 4
    --sequence-parallel
    --context-parallel-size 1
-   #--expert-model-parallel-size 8
-   --expert-model-parallel-size 4
+   --expert-model-parallel-size 8
    --expert-tensor-parallel-size 1
 
    --recompute-granularity full
    --recompute-method uniform
    --recompute-num-layers 4
 
-   # --micro-batch-size 1
    --use-dynamic-batch-size
    --max-tokens-per-gpu 4096
 )
@@ -138,7 +136,7 @@ ray job submit --address="http://127.0.0.1:8265" \
    --runtime-env-json="${RUNTIME_ENV_JSON}" \
    -- python3 train.py \
    --actor-num-nodes 1 \
-   --actor-num-gpus-per-node 4 \
+   --actor-num-gpus-per-node 8 \
    --colocate \
    --use-slime-router \
    ${DEBUG_ARGS[@]} \

@@ -570,3 +570,71 @@ async def list_mcp_tools(session: Any):
     return listed.tools
 
 
+def backwards_compatible_convert_envkey_to_datakey(
+    environment_version: str,
+) -> Optional[str]:
+    """Extract data_key from an environment version string.
+
+    This handles backwards compatibility for environment versions that include
+    a data key prefix (like "Aequus1.1.2" where "Aequus" is the data key).
+
+    Matches the version normalization logic from instances.py where versions
+    starting with digits are normalized to have a 'v' prefix (e.g., "1.2.3" -> "v1.2.3").
+
+    Examples:
+        - "Aequus1.1.2" -> "aequus"
+        - "ApertureNexus2.0.1" -> "aperturenexus"
+        - "Forge1.0.0" -> "nimbusforge" (hardcoded mapping)
+        - "v1.2.3" -> None (standard version format)
+        - "1.2.3" -> None (standard version format, would be normalized to v1.2.3)
+
+    Args:
+        environment_version: Version string from task env_variables
+
+    Returns:
+        data_key (lowercase) if version starts with alphabetic characters, otherwise None
+    """
+    print(
+        f"[backwards_compatible_convert_envkey_to_datakey] Input environment_version: '{environment_version}'"
+    )
+
+    if not environment_version:
+        print(
+            "[backwards_compatible_convert_envkey_to_datakey] Empty environment_version, returning None"
+        )
+        return None
+
+    # If it starts with 'v' or a digit, it's a standard version (no data_key)
+    # This matches instances.py logic where versions starting with digits are normalized to 'v' prefix
+    if environment_version.startswith("v") or environment_version[0].isdigit():
+        print(
+            "[backwards_compatible_convert_envkey_to_datakey] Standard version format (starts with 'v' or digit), no data_key"
+        )
+        return None
+
+    # Extract alphabetic prefix as data_key
+    match = re.match(r"^([a-zA-Z]+)", environment_version)
+    if match:
+        data_key = match.group(1).lower()
+
+        # Hardcoded mapping for legacy/shortened data key names
+        data_key_mappings = {
+            "forge": "nimbusforge",
+        }
+
+        if data_key in data_key_mappings:
+            original_key = data_key
+            data_key = data_key_mappings[data_key]
+            print(
+                f"[backwards_compatible_convert_envkey_to_datakey] ✓ Mapped '{original_key}' -> '{data_key}' from '{environment_version}'"
+            )
+        else:
+            print(
+                f"[backwards_compatible_convert_envkey_to_datakey] ✓ Extracted data_key: '{data_key}' from '{environment_version}'"
+            )
+        return data_key
+    else:
+        print(
+            f"[backwards_compatible_convert_envkey_to_datakey] No alphabetic prefix found in '{environment_version}'"
+        )
+        return None

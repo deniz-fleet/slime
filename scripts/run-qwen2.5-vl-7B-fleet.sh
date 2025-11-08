@@ -82,6 +82,7 @@ SGLANG_ARGS=(
 OPTIMIZER_ARGS=(
   --optimizer adam
   --lr 1e-6
+  --ckpt-format torch_dist
 )
 
 

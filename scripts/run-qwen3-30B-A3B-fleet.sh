@@ -88,7 +88,6 @@ OPTIMIZER_ARGS=(
    --adam-beta1 0.9
    --adam-beta2 0.98
    # Torch optimizer distributed
-   --ckpt-format torch_dist
    --use-distributed-optimizer
    --use-precision-aware-optimizer
    --optimizer-cpu-offload
@@ -123,6 +122,7 @@ MISC_ARGS=(
    # --attention-softmax-in-fp32
    # need to comment this when using model with MLA
    --attention-backend flash
+   --ckpt-format torch_dist
 )
 
 # launch the master node of ray in container

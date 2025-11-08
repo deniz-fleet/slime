@@ -69,7 +69,7 @@ PERF_ARGS=(
 
    # --micro-batch-size 1
    --use-dynamic-batch-size
-   --max-tokens-per-gpu 8192
+   --max-tokens-per-gpu 4096
 )
 
 GRPO_ARGS=(
@@ -89,6 +89,12 @@ OPTIMIZER_ARGS=(
    --weight-decay 0.1
    --adam-beta1 0.9
    --adam-beta2 0.98
+   # Enable distributed optimizer with CPU offload to reduce GPU memory
+   --use-distributed-optimizer
+   --use-precision-aware-optimizer
+   --optimizer-cpu-offload
+   --optimizer-offload-fraction 1.0
+   --overlap-cpu-optimizer-d2h-h2d
 )
 
 WANDB_ARGS=(
@@ -128,7 +134,7 @@ ray start --head --node-ip-address ${MASTER_ADDR} --num-gpus 8 --disable-usage-s
 RUNTIME_ENV_JSON="{
   \"env_vars\": {
     \"PYTHONPATH\": \"/root/Megatron-LM/\",
-    \"CUDA_DEVICE_MAX_CONNECTIONS\": \"32\",
+    \"CUDA_DEVICE_MAX_CONNECTIONS\": \"1\",
     \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\",
     \"SGLANG_TOOL_STRICT_LEVEL\": \"1\"
   }
